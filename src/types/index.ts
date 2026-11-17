@@ -5,7 +5,9 @@ export type BookingStatus = 'confirmed' | 'completed' | 'cancelled';
 
 export interface Profile {
   id: string;
+  email?: string;
   full_name: string;
+  dob?: string;
   avatar_url?: string;
   phone_number?: string;
   role: UserRole;
