@@ -53,16 +53,18 @@ export default async function HomePage() {
 
       {/* 1. HERO SECTION - Full Viewport Coverage (No white cut at bottom) */}
       <section className="relative min-h-[calc(100vh-5rem)] flex flex-col justify-center items-center overflow-hidden py-16 sm:py-24">
-        {/* Background Image with Glass Overlay covering entire screen */}
-        <div className="absolute inset-0 z-0">
-          <Image
-            src="https://images.unsplash.com/photo-1564507592333-c60657eea523?auto=format&fit=crop&w=2000&q=85"
-            alt="Majestic Taj Mahal Agra during golden sunrise"
-            fill
-            priority
-            sizes="100vw"
-            className="object-cover object-center scale-105 animate-in fade-in duration-1000"
-          />
+        {/* Background Image with Cinematic Zoom Motion & Glass Overlay */}
+        <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+          <div className="relative w-full h-full hero-zoom-animation">
+            <Image
+              src="https://images.unsplash.com/photo-1564507592333-c60657eea523?auto=format&fit=crop&w=2000&q=85"
+              alt="Majestic Taj Mahal Agra during golden sunrise"
+              fill
+              priority
+              sizes="100vw"
+              className="object-cover object-center"
+            />
+          </div>
           <div className="absolute inset-0 hero-gradient-overlay" />
           <div className="absolute inset-0 bg-radial-gradient from-transparent via-slate-950/40 to-slate-950/85" />
         </div>
@@ -78,10 +80,6 @@ export default async function HomePage() {
             Discover Heritage. <br />
             <span className="gold-gradient-text">Travel Smarter.</span>
           </h1>
-
-          <p className="max-w-2xl mx-auto text-base sm:text-lg text-slate-200 font-normal leading-relaxed">
-            Protecting our timeless monuments while elevating your travel experience. Check crowd density predictions, reserve priority entry slots, and explore architectural marvels at their most peaceful hours.
-          </p>
 
           {/* Interactive Search Bar on Hero */}
           <div className="max-w-2xl mx-auto pt-2">

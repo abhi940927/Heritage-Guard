@@ -68,6 +68,25 @@
   );
 }
 
+/* Cinematic Ken Burns zoom in / zoom out motion for hero background */
+@keyframes heroZoomInOut {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.15);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.hero-zoom-animation {
+  animation: heroZoomInOut 16s ease-in-out infinite;
+  will-change: transform;
+  transform-origin: center center;
+}
+
 /* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
