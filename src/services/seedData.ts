@@ -58,7 +58,7 @@ export const INITIAL_DESTINATIONS: Destination[] = [
     architecture_details:
       "Enclosed by 2.41 km of red sandstone ramparts. Highlights include Lahori Gate, Chhatta Chowk, Diwan-i-Aam, and Diwan-i-Khas marble pavilion.",
     cover_image_url:
-      "https://images.unsplash.com/photo-1587474260584-136574528ed5?auto=format&fit=crop&w=1600&q=85",
+      "https://images.unsplash.com/photo-1708394011246-8f3691b66c75?auto=format&fit=crop&w=1600&q=85",
     opening_time: "09:30:00",
     closing_time: "17:30:00",
     closed_days: ["Monday"],
@@ -209,7 +209,7 @@ export const INITIAL_DESTINATIONS: Destination[] = [
     architecture_details:
       "Built of red and pale Bharatpur sandstone in triumphal arch form, inscribed with over 13,300 fallen servicemen's names.",
     cover_image_url:
-      "https://images.unsplash.com/photo-1524492412937-b28074a5d7da?auto=format&fit=crop&w=1600&q=85",
+      "https://images.unsplash.com/photo-1587474260584-136574528ed5?auto=format&fit=crop&w=1600&q=85",
     opening_time: "00:00:00",
     closing_time: "23:59:59",
     closed_days: [],
