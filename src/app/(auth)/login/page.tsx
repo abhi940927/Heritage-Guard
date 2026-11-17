@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Suspense } from "react";
 import { Metadata } from "next";
 import { AuthPageContainer } from "@/components/auth/AuthPageContainer";
 
@@ -9,5 +9,9 @@ export const metadata: Metadata = {
 };
 
 export default function LoginPage() {
-  return <AuthPageContainer initialMode="login" />;
+  return (
+    <Suspense fallback={<div className="p-12 text-center text-slate-500 text-xs">Loading authentication portal...</div>}>
+      <AuthPageContainer initialMode="login" />
+    </Suspense>
+  );
 }

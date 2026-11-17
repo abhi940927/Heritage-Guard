@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { Button } from "@/components/ui/Button";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
@@ -71,6 +71,8 @@ export const AuthPageContainer: React.FC<AuthPageContainerProps> = ({
   initialMode = "login",
 }) => {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectTarget = searchParams.get("redirect") || "/dashboard";
   const [mode, setMode] = useState<"login" | "register">(initialMode);
   const [activeSlide, setActiveSlide] = useState(0);
 
@@ -239,10 +241,10 @@ export const AuthPageContainer: React.FC<AuthPageContainerProps> = ({
         throw new Error(data.error || "Invalid Gmail or password. Please verify your credentials.");
       }
 
-      setSuccessMessage(`Welcome back, ${data.user?.full_name || "Explorer"}! Redirecting to your dashboard...`);
+      setSuccessMessage(`Welcome back, ${data.user?.full_name || "Explorer"}! Redirecting...`);
       setTimeout(() => {
-        router.push("/dashboard");
-      }, 1000);
+        router.push(redirectTarget);
+      }, 900);
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Failed to sign in.";
       setErrorMessage(msg);

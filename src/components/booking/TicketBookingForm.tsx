@@ -26,6 +26,13 @@ interface TicketBookingFormProps {
   initialDestinationSlug?: string;
   initialTimeSlots?: VisitingTimeSlot[];
   initialTicketCategories?: TicketCategory[];
+  currentUser?: {
+    id: string;
+    email: string;
+    full_name: string;
+    dob?: string;
+    phone_number?: string;
+  } | null;
 }
 
 export const TicketBookingForm: React.FC<TicketBookingFormProps> = ({
@@ -33,7 +40,9 @@ export const TicketBookingForm: React.FC<TicketBookingFormProps> = ({
   initialDestinationSlug,
   initialTimeSlots = [],
   initialTicketCategories = [],
+  currentUser = null,
 }) => {
+  const [activeUser, setActiveUser] = useState(currentUser);
   const [selectedSlug, setSelectedSlug] = useState<string>(
     initialDestinationSlug || (destinations[0]?.slug ?? "taj-mahal")
   );
@@ -77,40 +86,61 @@ export const TicketBookingForm: React.FC<TicketBookingFormProps> = ({
   const [confirmedBooking, setConfirmedBooking] = useState<Booking | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
+  const handleLogout = async () => {
+    await fetch("/api/auth/logout", { method: "POST" });
+    window.location.reload();
+  };
+
   // Auto-prefill authenticated user details if logged in
   useEffect(() => {
-    fetch("/api/auth/me")
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.authenticated && data.user) {
-          if (!leadName) setLeadName(data.user.full_name || "");
-          if (!email) setEmail(data.user.email || "");
-          if (!phone && data.user.phone_number) setPhone(data.user.phone_number);
+    const applyUser = (user: {
+      id: string;
+      email: string;
+      full_name: string;
+      dob?: string;
+      phone_number?: string;
+    }) => {
+      setActiveUser(user);
+      if (!leadName) setLeadName(user.full_name || "");
+      if (!email) setEmail(user.email || "");
+      if (!phone && user.phone_number) setPhone(user.phone_number);
 
-          setVisitors((prev) => {
-            if (prev.length > 0 && !prev[0].fullName) {
-              let calculatedAge = 28;
-              if (data.user.dob) {
-                const birthYear = new Date(data.user.dob).getFullYear();
-                if (!isNaN(birthYear)) {
-                  calculatedAge = Math.max(1, new Date().getFullYear() - birthYear);
-                }
-              }
-              return [
-                {
-                  ...prev[0],
-                  fullName: data.user.full_name || "",
-                  age: calculatedAge,
-                },
-                ...prev.slice(1),
-              ];
-            }
-            return prev;
-          });
+      let calculatedAge = 28;
+      if (user.dob) {
+        const birthYear = new Date(user.dob).getFullYear();
+        if (!isNaN(birthYear)) {
+          calculatedAge = Math.max(1, new Date().getFullYear() - birthYear);
         }
-      })
-      .catch(() => {});
-  }, []);
+      }
+
+      setVisitors((prev) => {
+        if (prev.length > 0 && !prev[0].fullName) {
+          return [
+            {
+              ...prev[0],
+              fullName: user.full_name || "",
+              age: calculatedAge,
+            },
+            ...prev.slice(1),
+          ];
+        }
+        return prev;
+      });
+    };
+
+    if (currentUser) {
+      applyUser(currentUser);
+    } else {
+      fetch("/api/auth/me")
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.authenticated && data.user) {
+            applyUser(data.user);
+          }
+        })
+        .catch(() => {});
+    }
+  }, [currentUser]);
 
   // Time slots for selected destination
   const availableSlots = useMemo(() => {
@@ -315,6 +345,38 @@ export const TicketBookingForm: React.FC<TicketBookingFormProps> = ({
         <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-sm flex items-center gap-2">
           <AlertCircle className="w-5 h-5 text-rose-600 shrink-0" />
           <span>{errorMessage}</span>
+        </div>
+      )}
+
+      {/* Authenticated Explorer Status Bar */}
+      {activeUser && (
+        <div className="p-4 rounded-2xl bg-emerald-50/90 border border-emerald-300 text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm">
+          <div className="flex items-center gap-2.5">
+            <div className="p-2 rounded-xl bg-emerald-100 text-emerald-800">
+              <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="font-bold text-slate-900 text-sm">
+                  {activeUser.full_name}
+                </span>
+                <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300">
+                  Verified Explorer Account
+                </span>
+              </div>
+              <span className="text-[11px] text-slate-600">
+                Official passes and QR vouchers will be issued to: <strong>{activeUser.email}</strong>
+              </span>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={handleLogout}
+            className="text-slate-500 hover:text-slate-900 underline text-xs font-semibold self-end sm:self-auto"
+          >
+            Sign Out / Switch Account
+          </button>
         </div>
       )}
 

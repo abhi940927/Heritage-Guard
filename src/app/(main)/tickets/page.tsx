@@ -6,7 +6,9 @@ import {
   getDestinationTicketCategories,
   getDestinationBySlug,
 } from "@/services/destinationQueries";
+import { getCurrentActiveUser } from "@/services/authService";
 import { TicketBookingForm } from "@/components/booking/TicketBookingForm";
+import { SignInRequiredCard } from "@/components/booking/SignInRequiredCard";
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
 import { Ticket, ShieldCheck, CheckCircle2 } from "lucide-react";
 
@@ -43,6 +45,8 @@ export default async function TicketsPage({ searchParams }: TicketsPageProps) {
     ? await getDestinationTicketCategories(selectedDest.id)
     : [];
 
+  const currentUser = await getCurrentActiveUser();
+
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
       <Breadcrumbs items={[{ name: "Ticket Reservations", url: "/tickets" }]} />
@@ -53,20 +57,28 @@ export default async function TicketsPage({ searchParams }: TicketsPageProps) {
           <span>Official Digital Reservation Window</span>
         </div>
         <h1 className="font-serif text-3xl sm:text-5xl font-bold text-slate-900">
-          Heritage Entry Passes & Time Slots
+          Heritage Entry Passes &amp; Time Slots
         </h1>
         <p className="text-sm text-slate-600 max-w-2xl leading-relaxed">
           Select your monument, choose a crowd-governed visiting window, and register your party. Official digital vouchers with unique reference codes are generated immediately.
         </p>
       </div>
 
-      {/* Booking Form */}
-      <TicketBookingForm
-        destinations={destinations}
-        initialDestinationSlug={initialSlug}
-        initialTimeSlots={timeSlots}
-        initialTicketCategories={ticketCategories}
-      />
+      {/* Enforce Authentication Requirement */}
+      {!currentUser ? (
+        <SignInRequiredCard
+          destination={selectedDest}
+          redirectUrl={`/tickets?destination=${selectedDest.slug}`}
+        />
+      ) : (
+        <TicketBookingForm
+          destinations={destinations}
+          initialDestinationSlug={initialSlug}
+          initialTimeSlots={timeSlots}
+          initialTicketCategories={ticketCategories}
+          currentUser={currentUser}
+        />
+      )}
     </div>
   );
 }

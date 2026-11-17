@@ -23,10 +23,21 @@ declare global {
 if (!globalThis.__HERITAGE_USERS__) {
   globalThis.__HERITAGE_USERS__ = new Map<string, StoredUser>();
 
-  // Pre-seed a sample user for testing
+  // Pre-seed sample explorer accounts for testing and evaluation
   globalThis.__HERITAGE_USERS__.set("abhinav.singh@gmail.com", {
     id: "usr-abhinav-001",
     email: "abhinav.singh@gmail.com",
+    passwordHash: "Abhinav123!",
+    full_name: "Abhinav Singh",
+    dob: "1998-05-14",
+    phone_number: "+91 98765 43210",
+    role: "visitor",
+    created_at: new Date().toISOString(),
+  });
+
+  globalThis.__HERITAGE_USERS__.set("abhisingh940927@gmail.com", {
+    id: "usr-abhinav-002",
+    email: "abhisingh940927@gmail.com",
     passwordHash: "Abhinav123!",
     full_name: "Abhinav Singh",
     dob: "1998-05-14",
@@ -86,7 +97,6 @@ export async function registerNewUser(data: {
         console.warn("Supabase auth signUp warning:", authErr.message);
       } else if (authData?.user) {
         supabaseUserId = authData.user.id;
-        // Upsert into public.profiles
         try {
           await supabase.from("profiles").upsert({
             id: authData.user.id,
@@ -147,7 +157,6 @@ export async function loginUser(data: {
       });
 
       if (!authErr && authData?.user) {
-        // Fetch profile
         const { data: profileData } = await supabase
           .from("profiles")
           .select("*")
@@ -185,7 +194,6 @@ export async function loginUser(data: {
     }
   }
 
-  // If user wasn't registered in store yet, provide clear instruction
   return {
     success: false,
     error: "No account found with this email. Please register first to explore India's heritage sites.",
@@ -193,7 +201,7 @@ export async function loginUser(data: {
 }
 
 export async function getCurrentActiveUser(): Promise<StoredUser | null> {
-  // 1. Try Supabase
+  // 1. Try Supabase Server Client
   try {
     const supabase = await createServerSupabaseClient();
     if (supabase) {
@@ -217,10 +225,40 @@ export async function getCurrentActiveUser(): Promise<StoredUser | null> {
         };
       }
     }
-  } catch (err) {
+  } catch {
     // Ignore and fallback
   }
 
-  // 2. Fallback to active runtime session or default user
-  return globalThis.__CURRENT_USER_SESSION__ || usersStore.get("abhinav.singh@gmail.com") || null;
+  // 2. Check active global session
+  if (globalThis.__CURRENT_USER_SESSION__) {
+    return globalThis.__CURRENT_USER_SESSION__;
+  }
+
+  // 3. Check cookie hg_user_email from next/headers
+  try {
+    const { cookies } = await import("next/headers");
+    const cookieStore = await cookies();
+    const emailCookie = cookieStore.get("hg_user_email")?.value;
+    if (emailCookie && usersStore.has(emailCookie)) {
+      const u = usersStore.get(emailCookie)!;
+      globalThis.__CURRENT_USER_SESSION__ = u;
+      return u;
+    }
+  } catch {
+    // Ignore when cookies() cannot be evaluated in this scope
+  }
+
+  return null;
+}
+
+export async function logoutUser(): Promise<void> {
+  try {
+    const supabase = await createServerSupabaseClient();
+    if (supabase) {
+      await supabase.auth.signOut();
+    }
+  } catch {
+    // Ignore
+  }
+  globalThis.__CURRENT_USER_SESSION__ = null;
 }
