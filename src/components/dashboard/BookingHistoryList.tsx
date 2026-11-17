@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { Booking } from "@/types";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { formatCurrency, formatDate } from "@/lib/utils/formatters";
+import { MiniQRCode } from "@/components/booking/MiniQRCode";
 import {
   Calendar,
   Clock,
@@ -95,38 +96,49 @@ export const BookingHistoryList: React.FC<BookingHistoryListProps> = ({ bookings
             {/* Expanded details */}
             {isExpanded && (
               <div className="mt-4 pt-4 border-t border-slate-200/80 space-y-4 animate-in fade-in duration-200">
-                <div className="p-4 rounded-xl bg-amber-50/60 border border-amber-200/60 text-xs space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="font-bold text-amber-950">
-                      Primary Lead: {b.visitor_lead_name}
-                    </span>
-                    <span className="text-slate-500">Email: {b.contact_email}</span>
+                <div className="flex flex-col sm:flex-row gap-4 items-start">
+                  {/* Scannable Dynamic QR Code */}
+                  <div className="shrink-0 mx-auto sm:mx-0">
+                    <MiniQRCode
+                      reference={b.booking_reference}
+                      destinationName={b.destination_name || "Heritage Monument"}
+                      size={110}
+                    />
                   </div>
 
-                  <div>
-                    <span className="font-semibold text-slate-700 block mb-1.5">
-                      Visitor Roster:
-                    </span>
-                    <div className="space-y-1">
-                      {b.visitors && b.visitors.length > 0 ? (
-                        b.visitors.map((v, i) => (
-                          <div
-                            key={i}
-                            className="flex items-center justify-between bg-white/70 p-2 rounded-lg text-slate-800"
-                          >
-                            <span>
-                              {i + 1}. {v.full_name} ({v.age} yrs)
-                            </span>
-                            <span className="text-slate-500">
-                              {v.category_name} • {v.id_proof_type || "ID Proof"}
-                            </span>
+                  <div className="flex-1 p-4 rounded-xl bg-amber-50/60 border border-amber-200/60 text-xs space-y-3 w-full">
+                    <div className="flex items-center justify-between">
+                      <span className="font-bold text-amber-950">
+                        Primary Lead: {b.visitor_lead_name}
+                      </span>
+                      <span className="text-slate-500">Email: {b.contact_email}</span>
+                    </div>
+
+                    <div>
+                      <span className="font-semibold text-slate-700 block mb-1.5">
+                        Visitor Roster:
+                      </span>
+                      <div className="space-y-1">
+                        {b.visitors && b.visitors.length > 0 ? (
+                          b.visitors.map((v, i) => (
+                            <div
+                              key={i}
+                              className="flex items-center justify-between bg-white/70 p-2 rounded-lg text-slate-800"
+                            >
+                              <span>
+                                {i + 1}. {v.full_name} ({v.age} yrs)
+                              </span>
+                              <span className="text-slate-500">
+                                {v.category_name} • {v.id_proof_type || "ID Proof"}
+                              </span>
+                            </div>
+                          ))
+                        ) : (
+                          <div className="bg-white/70 p-2 rounded-lg text-slate-800">
+                            {b.visitor_lead_name} (Lead)
                           </div>
-                        ))
-                      ) : (
-                        <div className="bg-white/70 p-2 rounded-lg text-slate-800">
-                          {b.visitor_lead_name} (Lead)
-                        </div>
-                      )}
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -137,7 +149,7 @@ export const BookingHistoryList: React.FC<BookingHistoryListProps> = ({ bookings
                     className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-900 text-white hover:bg-amber-700 transition-colors"
                   >
                     <Download className="w-3.5 h-3.5" />
-                    Print Entry Voucher
+                    Print Entry Voucher Pass
                   </button>
                 </div>
               </div>

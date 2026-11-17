@@ -1,11 +1,12 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { Destination, VisitingTimeSlot, TicketCategory, Booking } from "@/types";
 import { CrowdStatusBadge } from "@/components/crowd/CrowdStatusBadge";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { Button } from "@/components/ui/Button";
 import { formatCurrency, formatDate } from "@/lib/utils/formatters";
+import { BookingVoucherPass } from "./BookingVoucherPass";
 import {
   Calendar,
   Clock,
@@ -75,6 +76,41 @@ export const TicketBookingForm: React.FC<TicketBookingFormProps> = ({
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [confirmedBooking, setConfirmedBooking] = useState<Booking | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  // Auto-prefill authenticated user details if logged in
+  useEffect(() => {
+    fetch("/api/auth/me")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.authenticated && data.user) {
+          if (!leadName) setLeadName(data.user.full_name || "");
+          if (!email) setEmail(data.user.email || "");
+          if (!phone && data.user.phone_number) setPhone(data.user.phone_number);
+
+          setVisitors((prev) => {
+            if (prev.length > 0 && !prev[0].fullName) {
+              let calculatedAge = 28;
+              if (data.user.dob) {
+                const birthYear = new Date(data.user.dob).getFullYear();
+                if (!isNaN(birthYear)) {
+                  calculatedAge = Math.max(1, new Date().getFullYear() - birthYear);
+                }
+              }
+              return [
+                {
+                  ...prev[0],
+                  fullName: data.user.full_name || "",
+                  age: calculatedAge,
+                },
+                ...prev.slice(1),
+              ];
+            }
+            return prev;
+          });
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   // Time slots for selected destination
   const availableSlots = useMemo(() => {
@@ -251,141 +287,25 @@ export const TicketBookingForm: React.FC<TicketBookingFormProps> = ({
     }
   };
 
-  // If booking is confirmed, show the voucher modal
+  // If booking is confirmed, show the voucher modal with real dynamic QR Code
   if (confirmedBooking) {
     return (
-      <GlassCard className="max-w-2xl mx-auto p-6 sm:p-8 space-y-6 border-amber-300">
-        <div className="text-center space-y-2">
-          <div className="w-16 h-16 bg-emerald-100 text-emerald-700 rounded-full flex items-center justify-center mx-auto mb-3">
-            <CheckCircle2 className="w-10 h-10" />
-          </div>
-          <span className="text-xs font-bold uppercase tracking-widest text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
-            Booking Confirmed & QR Issued
-          </span>
-          <h2 className="text-2xl font-serif font-bold text-slate-900">
-            Heritage Entry Reservation Pass
-          </h2>
-          <p className="text-sm text-slate-600">
-            Official visiting slot confirmed for{" "}
-            <strong>{confirmedBooking.destination_name}</strong>
-          </p>
-        </div>
-
-        {/* Voucher Box */}
-        <div className="p-5 rounded-2xl bg-amber-50/70 border-2 border-dashed border-amber-300 space-y-4">
-          <div className="flex items-center justify-between border-b border-amber-200/80 pb-3">
-            <div>
-              <span className="text-xs text-amber-800 font-medium block">
-                Booking Reference No.
-              </span>
-              <span className="text-lg font-mono font-bold text-slate-900 tracking-wider">
-                {confirmedBooking.booking_reference}
-              </span>
-            </div>
-            <span className="px-3 py-1 text-xs font-semibold rounded-lg bg-emerald-600 text-white">
-              Valid for Entry
-            </span>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4 text-xs">
-            <div>
-              <span className="text-slate-500 block">Date of Visit</span>
-              <span className="font-semibold text-slate-800 text-sm">
-                {formatDate(confirmedBooking.visit_date)}
-              </span>
-            </div>
-            <div>
-              <span className="text-slate-500 block">Time Slot</span>
-              <span className="font-semibold text-slate-800 text-sm">
-                {confirmedBooking.slot_label}
-              </span>
-            </div>
-            <div>
-              <span className="text-slate-500 block">Lead Visitor</span>
-              <span className="font-semibold text-slate-800">
-                {confirmedBooking.visitor_lead_name}
-              </span>
-            </div>
-            <div>
-              <span className="text-slate-500 block">Total Visitors</span>
-              <span className="font-semibold text-slate-800">
-                {confirmedBooking.total_visitors} Person(s)
-              </span>
-            </div>
-            <div>
-              <span className="text-slate-500 block">Contact Email</span>
-              <span className="font-semibold text-slate-800">
-                {confirmedBooking.contact_email}
-              </span>
-            </div>
-            <div>
-              <span className="text-slate-500 block">Amount Paid (Demo)</span>
-              <span className="font-bold text-slate-900 text-sm">
-                {formatCurrency(confirmedBooking.total_amount)}
-              </span>
-            </div>
-          </div>
-
-          {/* Visitors breakdown */}
-          <div className="pt-2 border-t border-amber-200/70">
-            <span className="text-xs font-bold text-slate-700 block mb-2">
-              Registered Visitors:
-            </span>
-            <div className="space-y-1">
-              {confirmedBooking.visitors?.map((vis, idx) => (
-                <div
-                  key={idx}
-                  className="flex items-center justify-between text-xs bg-white/60 p-2 rounded-lg"
-                >
-                  <span className="font-medium text-slate-900">
-                    {idx + 1}. {vis.full_name} ({vis.age} yrs)
-                  </span>
-                  <span className="text-slate-500">{vis.category_name}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Demo Notice */}
-        <div className="p-3 bg-blue-50 text-blue-900 rounded-xl text-xs flex items-center gap-2 border border-blue-200">
-          <ShieldCheck className="w-4 h-4 text-blue-600 shrink-0" />
-          <span>
-            <strong>Simulated Gate Checkout:</strong> This reservation record has been saved to the database. Present your reference number at the turnstile.
-          </span>
-        </div>
-
-        {/* Actions */}
-        <div className="flex flex-col sm:flex-row items-center gap-3 pt-2">
-          <Button
-            variant="outline"
-            className="w-full sm:w-1/2"
-            onClick={() => window.print()}
-          >
-            <Download className="w-4 h-4 mr-1.5" />
-            Print / Save PDF
-          </Button>
-          <Button
-            variant="primary"
-            className="w-full sm:w-1/2"
-            onClick={() => {
-              setConfirmedBooking(null);
-              setLeadName("");
-              setVisitors([
-                {
-                  fullName: "",
-                  age: 30,
-                  categoryName: "Indian Citizen",
-                  idProofType: "Aadhaar Card",
-                  idProofNumber: "",
-                },
-              ]);
-            }}
-          >
-            Book Another Visit
-          </Button>
-        </div>
-      </GlassCard>
+      <BookingVoucherPass
+        booking={confirmedBooking}
+        onBookAnother={() => {
+          setConfirmedBooking(null);
+          setLeadName("");
+          setVisitors([
+            {
+              fullName: "",
+              age: 28,
+              categoryName: "Indian Citizen",
+              idProofType: "Aadhaar Card",
+              idProofNumber: "",
+            },
+          ]);
+        }}
+      />
     );
   }
 
