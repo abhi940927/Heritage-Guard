@@ -131,3 +131,107 @@ export interface ContactMessage {
   status: 'unread' | 'read' | 'archived';
   created_at: string;
 }
+
+// ============================================================================
+// SMART CROWD MONITORING & PREDICTION ENGINE TYPES
+// ============================================================================
+
+export interface DestinationCrowdConfig {
+  destination_id: string;
+  max_approved_capacity: number;
+  threshold_low: number; // e.g. 30 (0 - 30% Low)
+  threshold_moderate: number; // e.g. 60 (31 - 60% Moderate)
+  threshold_high: number; // e.g. 85 (61 - 85% High, >85% Very High)
+  queue_service_rate_per_min: number; // visitors processed per minute by turnstiles
+  baseline_visitor_count: number;
+  official_conservation_source: string;
+  updated_at?: string;
+}
+
+export type ScanType = 'entry' | 'exit';
+
+export interface VisitorAccessLog {
+  id: string;
+  destination_id: string;
+  ticket_reference: string;
+  booking_id?: string | null;
+  scan_type: ScanType;
+  gate_id: string;
+  scanner_device_id: string;
+  scanned_at: string;
+  is_valid: boolean;
+  rejection_reason?: string | null;
+  created_at?: string;
+}
+
+export interface CrowdLiveSnapshot {
+  id: string;
+  destination_id: string;
+  destination_name?: string;
+  destination_slug?: string;
+  recorded_at: string;
+  previous_visitors: number;
+  total_entries: number;
+  total_exits: number;
+  current_visitors: number;
+  max_capacity: number;
+  occupancy_percentage: number;
+  crowd_status: CrowdLevel;
+  avg_entry_rate_per_min: number;
+  avg_exit_rate_per_min: number;
+  queue_length: number;
+  estimated_wait_time_minutes: number;
+  crowd_trend: CrowdTrend;
+  data_source: string;
+  is_simulated: boolean;
+  last_telemetry_at: string;
+  thresholds?: {
+    low: number;
+    moderate: number;
+    high: number;
+  };
+}
+
+export interface CrowdPrediction {
+  id?: string;
+  destination_id: string;
+  generated_at: string;
+  horizon_minutes: 15 | 30 | 60;
+  predicted_entries: number;
+  predicted_exits: number;
+  expected_visitors: number;
+  predicted_occupancy_percentage: number;
+  expected_crowd_category: CrowdLevel;
+  predicted_crowd_trend: CrowdTrend;
+  is_simulated: boolean;
+}
+
+export interface CrowdAuditRecord {
+  id: string;
+  destination_id: string;
+  action_type: 'manual_calibration' | 'scan_entry' | 'scan_exit' | 'capacity_override' | 'threshold_update' | 'sensor_sync';
+  actor_email: string;
+  actor_role: string;
+  details: Record<string, unknown>;
+  created_at: string;
+}
+
+export interface MonumentCrowdTelemetry {
+  destination: Destination;
+  config: DestinationCrowdConfig;
+  snapshot: CrowdLiveSnapshot;
+  predictions: {
+    m15: CrowdPrediction;
+    m30: CrowdPrediction;
+    m60: CrowdPrediction;
+  };
+  hourlyTrends: {
+    hour: string;
+    expectedLevel: CrowdLevel;
+    percentage: number;
+    entries: number;
+    exits: number;
+  }[];
+  recentScans?: VisitorAccessLog[];
+}
+

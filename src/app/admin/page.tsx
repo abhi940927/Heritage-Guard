@@ -5,6 +5,7 @@ import { getAllBookingsAdmin } from "@/services/bookingActions";
 import { AdminStatsCards } from "@/components/admin/AdminStatsCards";
 import { DestinationManager } from "@/components/admin/DestinationManager";
 import { BookingsTable } from "@/components/admin/BookingsTable";
+import { AdminCrowdCalibration } from "@/components/admin/AdminCrowdCalibration";
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
 import { ShieldCheck, Lock, Activity, Users } from "lucide-react";
 
@@ -62,8 +63,13 @@ export default async function AdminPage() {
         averageCrowdPercent={averageCrowdPercent}
       />
 
-      {/* Tab / Section: Destination Management & Crowd Overrides */}
+      {/* Smart Crowd Telemetry & Gate Calibration */}
       <div className="space-y-6 pt-4">
+        <AdminCrowdCalibration />
+      </div>
+
+      {/* Tab / Section: Destination Management & Crowd Overrides */}
+      <div className="space-y-6 pt-6 border-t border-slate-200">
         <DestinationManager initialDestinations={destinations} />
       </div>
 

@@ -12,6 +12,7 @@ import {
 import { getCrowdSummaryBySlug } from "@/services/crowdQueries";
 import { CrowdStatusBadge } from "@/components/crowd/CrowdStatusBadge";
 import { CrowdChart } from "@/components/crowd/CrowdChart";
+import { PredictionForecastWidget } from "@/components/crowd/PredictionForecastWidget";
 import { SimulatedNotice } from "@/components/crowd/SimulatedNotice";
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
 import { GlassCard } from "@/components/ui/GlassCard";
@@ -253,12 +254,77 @@ export default async function DestinationDetailPage({
               </GlassCard>
             </div>
 
-            {/* Density Chart if available */}
+            {/* Density Telemetry, Carrying Capacity & Short-Term Predictions */}
             {crowdSummary && (
-              <div className="space-y-3">
-                <h3 className="font-serif text-2xl font-bold text-slate-900">
-                  Visitor Flow Forecast
-                </h3>
+              <div className="space-y-6">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200 pb-3">
+                  <div className="space-y-0.5">
+                    <h3 className="font-serif text-2xl font-bold text-slate-900">
+                      Live Carrying Capacity & Density Telemetry
+                    </h3>
+                    <p className="text-xs text-slate-500">
+                      Citing {crowdSummary.officialConservationSource}
+                    </p>
+                  </div>
+                  <span className="text-[10px] font-mono px-2.5 py-1 rounded-md bg-amber-100 text-amber-900 font-bold border border-amber-300 self-start sm:self-auto">
+                    DEMO DATA
+                  </span>
+                </div>
+
+                {/* Capacity Gauge */}
+                <GlassCard className="p-5 space-y-4">
+                  <div className="flex items-center justify-between text-xs font-semibold text-slate-800">
+                    <span>Current Monument Occupancy</span>
+                    <span>
+                      {crowdSummary.currentVisitors.toLocaleString()} / {crowdSummary.maxCapacity.toLocaleString()} visitors ({crowdSummary.currentCrowdPercentage}%)
+                    </span>
+                  </div>
+                  <div className="relative w-full bg-slate-200 rounded-full h-3 overflow-hidden">
+                    <div
+                      className={`h-full rounded-full transition-all duration-700 ${
+                        crowdSummary.currentCrowdPercentage >= crowdSummary.thresholds.high
+                          ? "bg-gradient-to-r from-orange-500 to-rose-600"
+                          : crowdSummary.currentCrowdPercentage >= crowdSummary.thresholds.moderate
+                          ? "bg-gradient-to-r from-amber-500 to-orange-500"
+                          : "bg-gradient-to-r from-emerald-500 to-teal-500"
+                      }`}
+                      style={{ width: `${Math.min(100, crowdSummary.currentCrowdPercentage)}%` }}
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1 text-center">
+                    <div className="p-2 rounded-lg bg-slate-50 border border-slate-200/70">
+                      <span className="text-[10px] text-slate-400 block">Queue Wait</span>
+                      <span className="text-sm font-bold text-amber-700">{crowdSummary.waitTimeMinutes} mins</span>
+                    </div>
+                    <div className="p-2 rounded-lg bg-slate-50 border border-slate-200/70">
+                      <span className="text-[10px] text-slate-400 block">Queue Length</span>
+                      <span className="text-sm font-bold text-slate-800">{crowdSummary.queueLength} visitors</span>
+                    </div>
+                    <div className="p-2 rounded-lg bg-slate-50 border border-slate-200/70">
+                      <span className="text-[10px] text-slate-400 block">Entry Flow</span>
+                      <span className="text-sm font-bold text-emerald-700">{crowdSummary.avgEntryRatePerMin} /min</span>
+                    </div>
+                    <div className="p-2 rounded-lg bg-slate-50 border border-slate-200/70">
+                      <span className="text-[10px] text-slate-400 block">Flow Trend</span>
+                      <span className="text-sm font-bold text-slate-800 capitalize">{crowdSummary.crowdTrend}</span>
+                    </div>
+                  </div>
+                </GlassCard>
+
+                {/* Short-Term Predictions */}
+                <div className="p-5 rounded-2xl bg-amber-50/40 border border-amber-200/80 shadow-xs">
+                  <PredictionForecastWidget
+                    predictions={crowdSummary.predictions}
+                    config={{
+                      max_approved_capacity: crowdSummary.maxCapacity,
+                      threshold_low: crowdSummary.thresholds.low,
+                      threshold_moderate: crowdSummary.thresholds.moderate,
+                      threshold_high: crowdSummary.thresholds.high,
+                    }}
+                  />
+                </div>
+
+                {/* Hourly Diurnal Curve */}
                 <CrowdChart
                   hourlyTrends={crowdSummary.hourlyTrends}
                   destinationName={destination.name}

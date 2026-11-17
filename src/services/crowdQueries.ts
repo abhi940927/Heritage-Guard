@@ -1,9 +1,10 @@
-import { CrowdReport, CrowdLevel, CrowdTrend } from "@/types";
-import { INITIAL_CROWD_REPORTS } from "./seedData";
-import { getDestinations } from "./destinationQueries";
-import { createServerSupabaseClient } from "@/lib/supabase/server";
-
-let localCrowdReports: CrowdReport[] = [...INITIAL_CROWD_REPORTS];
+import { CrowdReport, CrowdLevel, CrowdTrend, CrowdPrediction, MonumentCrowdTelemetry } from "@/types";
+import {
+  getAllMonumentsCrowdTelemetry,
+  getMonumentCrowdTelemetry,
+  calibrateCrowdMetrics,
+  processTurnstileScan,
+} from "./crowdEngine";
 
 export interface DestinationCrowdSummary {
   destinationId: string;
@@ -12,47 +13,117 @@ export interface DestinationCrowdSummary {
   location: string;
   state: string;
   category: string;
+  currentVisitors: number;
+  maxCapacity: number;
   currentCrowdLevel: CrowdLevel;
   currentCrowdPercentage: number;
   crowdTrend: CrowdTrend;
+  totalEntries: number;
+  totalExits: number;
+  avgEntryRatePerMin: number;
+  avgExitRatePerMin: number;
+  queueLength: number;
   waitTimeMinutes: number;
   entryRatePerHour: number;
   bestVisitingHours: string;
   dataSource: string;
   isSimulated: boolean;
-  hourlyTrends: { hour: string; expectedLevel: CrowdLevel; percentage: number }[];
+  lastTelemetryAt: string;
+  officialConservationSource: string;
+  thresholds: {
+    low: number;
+    moderate: number;
+    high: number;
+  };
+  predictions: {
+    m15: CrowdPrediction;
+    m30: CrowdPrediction;
+    m60: CrowdPrediction;
+  };
+  hourlyTrends: {
+    hour: string;
+    expectedLevel: CrowdLevel;
+    percentage: number;
+    entries?: number;
+    exits?: number;
+  }[];
 }
 
 export async function getAllCrowdSummaries(): Promise<DestinationCrowdSummary[]> {
-  const destinations = await getDestinations();
+  const telemetries = await getAllMonumentsCrowdTelemetry();
 
-  return destinations.map((d) => {
-    const report = localCrowdReports.find((r) => r.destination_id === d.id);
-    const hourlyTrends = generateHourlyTrends(d.current_crowd_percentage);
-
-    return {
-      destinationId: d.id,
-      name: d.name,
-      slug: d.slug,
-      location: d.location,
-      state: d.state,
-      category: d.category,
-      currentCrowdLevel: d.current_crowd_level,
-      currentCrowdPercentage: d.current_crowd_percentage,
-      crowdTrend: d.crowd_trend,
-      waitTimeMinutes: report?.wait_time_minutes ?? Math.round(d.current_crowd_percentage * 0.3),
-      entryRatePerHour: report?.entry_rate_per_hour ?? Math.round(d.current_crowd_percentage * 15 + 200),
-      bestVisitingHours: d.best_visiting_hours,
-      dataSource: report?.data_source ?? "Simulated Heritage Informatics Model (Demo)",
-      isSimulated: true, // Transparently labelled
-      hourlyTrends,
-    };
-  });
+  return telemetries.map((t) => ({
+    destinationId: t.destination.id,
+    name: t.destination.name,
+    slug: t.destination.slug,
+    location: t.destination.location,
+    state: t.destination.state,
+    category: t.destination.category,
+    currentVisitors: t.snapshot.current_visitors,
+    maxCapacity: t.config.max_approved_capacity,
+    currentCrowdLevel: t.snapshot.crowd_status,
+    currentCrowdPercentage: t.snapshot.occupancy_percentage,
+    crowdTrend: t.snapshot.crowd_trend,
+    totalEntries: t.snapshot.total_entries,
+    totalExits: t.snapshot.total_exits,
+    avgEntryRatePerMin: t.snapshot.avg_entry_rate_per_min,
+    avgExitRatePerMin: t.snapshot.avg_exit_rate_per_min,
+    queueLength: t.snapshot.queue_length,
+    waitTimeMinutes: t.snapshot.estimated_wait_time_minutes,
+    entryRatePerHour: Math.round(t.snapshot.avg_entry_rate_per_min * 60),
+    bestVisitingHours: t.destination.best_visiting_hours,
+    dataSource: t.snapshot.data_source,
+    isSimulated: true, // Transparently labelled DEMO DATA
+    lastTelemetryAt: t.snapshot.last_telemetry_at,
+    officialConservationSource: t.config.official_conservation_source,
+    thresholds: {
+      low: t.config.threshold_low,
+      moderate: t.config.threshold_moderate,
+      high: t.config.threshold_high,
+    },
+    predictions: t.predictions,
+    hourlyTrends: t.hourlyTrends,
+  }));
 }
 
-export async function getCrowdSummaryBySlug(slug: string): Promise<DestinationCrowdSummary | null> {
-  const all = await getAllCrowdSummaries();
-  return all.find((item) => item.slug === slug) || null;
+export async function getCrowdSummaryBySlug(
+  slug: string
+): Promise<DestinationCrowdSummary | null> {
+  const telemetry = await getMonumentCrowdTelemetry(slug);
+  if (!telemetry) return null;
+
+  return {
+    destinationId: telemetry.destination.id,
+    name: telemetry.destination.name,
+    slug: telemetry.destination.slug,
+    location: telemetry.destination.location,
+    state: telemetry.destination.state,
+    category: telemetry.destination.category,
+    currentVisitors: telemetry.snapshot.current_visitors,
+    maxCapacity: telemetry.config.max_approved_capacity,
+    currentCrowdLevel: telemetry.snapshot.crowd_status,
+    currentCrowdPercentage: telemetry.snapshot.occupancy_percentage,
+    crowdTrend: telemetry.snapshot.crowd_trend,
+    totalEntries: telemetry.snapshot.total_entries,
+    totalExits: telemetry.snapshot.total_exits,
+    avgEntryRatePerMin: telemetry.snapshot.avg_entry_rate_per_min,
+    avgExitRatePerMin: telemetry.snapshot.avg_exit_rate_per_min,
+    queueLength: telemetry.snapshot.queue_length,
+    waitTimeMinutes: telemetry.snapshot.estimated_wait_time_minutes,
+    entryRatePerHour: Math.round(telemetry.snapshot.avg_entry_rate_per_min * 60),
+    bestVisitingHours: telemetry.destination.best_visiting_hours,
+    dataSource: telemetry.snapshot.data_source,
+    isSimulated: true,
+    lastTelemetryAt: telemetry.snapshot.last_telemetry_at,
+    officialConservationSource: telemetry.config.official_conservation_source,
+    thresholds: {
+      low: telemetry.config.threshold_low,
+      moderate: telemetry.config.threshold_moderate,
+      high: telemetry.config.threshold_high,
+    },
+    predictions: telemetry.predictions,
+    hourlyTrends: telemetry.hourlyTrends,
+  };
 }
 
 export async function updateDestinationCrowd(
@@ -62,87 +133,24 @@ export async function updateDestinationCrowd(
   trend: CrowdTrend
 ): Promise<boolean> {
   try {
-    const supabase = await createServerSupabaseClient();
-    if (supabase) {
-      await supabase
-        .from("destinations")
-        .update({
-          current_crowd_level: level,
-          current_crowd_percentage: percentage,
-          crowd_trend: trend,
-        })
-        .eq("id", destinationId);
+    const telemetry = await getMonumentCrowdTelemetry(destinationId);
+    const capacity = telemetry?.config.max_approved_capacity || 5000;
+    const calculatedVisitors = Math.round((percentage / 100) * capacity);
 
-      await supabase.from("crowd_reports").insert({
-        destination_id: destinationId,
-        crowd_level: level,
-        crowd_percentage: percentage,
-        wait_time_minutes: Math.round(percentage * 0.3),
-        entry_rate_per_hour: Math.round(percentage * 16 + 200),
-        data_source: "Admin Manual Override Stream (Simulated Demo)",
-        is_simulated: true,
-      });
-    }
-  } catch (err) {
-    console.warn("Error updating crowd in Supabase:", err);
-  }
-
-  // Update local reports
-  const repIdx = localCrowdReports.findIndex((r) => r.destination_id === destinationId);
-  if (repIdx !== -1) {
-    localCrowdReports[repIdx] = {
-      ...localCrowdReports[repIdx],
-      crowd_level: level,
-      crowd_percentage: percentage,
-      wait_time_minutes: Math.round(percentage * 0.3),
-      entry_rate_per_hour: Math.round(percentage * 16 + 200),
-      recorded_at: new Date().toISOString(),
-    };
-  } else {
-    localCrowdReports.push({
-      id: `cr-${Date.now()}`,
-      destination_id: destinationId,
-      recorded_at: new Date().toISOString(),
-      crowd_level: level,
-      crowd_percentage: percentage,
-      wait_time_minutes: Math.round(percentage * 0.3),
-      entry_rate_per_hour: Math.round(percentage * 16 + 200),
-      data_source: "Admin Manual Override Stream (Simulated Demo)",
-      is_simulated: true,
+    await calibrateCrowdMetrics(destinationId, "admin@heritageguard.gov.in", {
+      visitorCountOverride: calculatedVisitors,
+      trendOverride: trend,
     });
+    return true;
+  } catch (err) {
+    console.error("Error updating destination crowd:", err);
+    return false;
   }
-
-  return true;
 }
 
-function generateHourlyTrends(basePercentage: number): {
-  hour: string;
-  expectedLevel: CrowdLevel;
-  percentage: number;
-}[] {
-  const hours = [
-    { hour: "06:00 AM", factor: 0.35 },
-    { hour: "07:30 AM", factor: 0.5 },
-    { hour: "09:00 AM", factor: 0.8 },
-    { hour: "10:30 AM", factor: 1.1 },
-    { hour: "12:00 PM", factor: 1.25 },
-    { hour: "01:30 PM", factor: 1.15 },
-    { hour: "03:00 PM", factor: 1.0 },
-    { hour: "04:30 PM", factor: 0.85 },
-    { hour: "06:00 PM", factor: 0.55 },
-  ];
-
-  return hours.map(({ hour, factor }) => {
-    const calculated = Math.min(100, Math.max(10, Math.round(basePercentage * factor)));
-    let expectedLevel: CrowdLevel = "Low";
-    if (calculated >= 80) expectedLevel = "Very High";
-    else if (calculated >= 65) expectedLevel = "High";
-    else if (calculated >= 40) expectedLevel = "Moderate";
-
-    return {
-      hour,
-      percentage: calculated,
-      expectedLevel,
-    };
-  });
-}
+export {
+  getAllMonumentsCrowdTelemetry,
+  getMonumentCrowdTelemetry,
+  calibrateCrowdMetrics,
+  processTurnstileScan,
+};
