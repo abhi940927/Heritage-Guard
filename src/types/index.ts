@@ -89,6 +89,8 @@ export interface Booking {
   visitor_lead_name: string;
   created_at: string;
   updated_at?: string;
+  qr_issued_at?: string;
+  qr_expires_at?: string;
   visitors?: BookingVisitor[];
   destination?: Destination;
 }

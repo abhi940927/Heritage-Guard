@@ -103,6 +103,8 @@ export const BookingHistoryList: React.FC<BookingHistoryListProps> = ({ bookings
                       reference={b.booking_reference}
                       destinationName={b.destination_name || "Heritage Monument"}
                       size={110}
+                      issuedAt={b.qr_issued_at}
+                      expiresAt={b.qr_expires_at}
                     />
                   </div>
 

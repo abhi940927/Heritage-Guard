@@ -1,16 +1,61 @@
 import { NextRequest, NextResponse } from "next/server";
-import { processTurnstileScan } from "@/services/crowdEngine";
+import {
+  processTurnstileScan,
+  registerTicketIssuance,
+  getTicketIssuanceInfo,
+} from "@/services/crowdEngine";
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const {
+      action = "scan",
       destination_id,
       ticket_reference,
       scan_type,
       gate_id = "GATE-MAIN-01",
       scanner_device_id = "SCANNER-WEB-SIM",
+      custom_scan_timestamp_ms,
+      qr_issued_timestamp_ms,
     } = body;
+
+    // Support ticket issuance registration & renewal for dynamic 3-hour window
+    if (action === "refresh" || action === "register") {
+      if (!ticket_reference) {
+        return NextResponse.json(
+          { error: "ticket_reference is required to register or refresh ticket" },
+          { status: 400 }
+        );
+      }
+      const reg = registerTicketIssuance(
+        ticket_reference,
+        qr_issued_timestamp_ms || Date.now()
+      );
+      return NextResponse.json({
+        success: true,
+        message: "Dynamic QR pass registered with fresh 3-hour validity.",
+        ticket_reference: ticket_reference.toUpperCase(),
+        issued_at: reg.issuedAt,
+        expires_at: reg.expiresAt,
+        validity_hours: 3,
+        is_expired: reg.isExpired,
+      });
+    }
+
+    if (action === "check") {
+      if (!ticket_reference) {
+        return NextResponse.json(
+          { error: "ticket_reference is required" },
+          { status: 400 }
+        );
+      }
+      const info = getTicketIssuanceInfo(ticket_reference);
+      return NextResponse.json({
+        success: true,
+        ticket_reference: ticket_reference.toUpperCase(),
+        ...info,
+      });
+    }
 
     if (!destination_id) {
       return NextResponse.json(
@@ -36,10 +81,21 @@ export async function POST(request: NextRequest) {
       ticket_reference,
       scan_type,
       gate_id,
-      scanner_device_id
+      scanner_device_id,
+      {
+        customScanTimestampMs: custom_scan_timestamp_ms,
+        qrIssuedTimestampMs: qr_issued_timestamp_ms,
+      }
     );
 
     if (!result.success) {
+      const statusCode =
+        result.rejectionCode === "QR_EXPIRED"
+          ? 410 // 410 Gone / Expired
+          : result.rejectionCode === "ALREADY_CHECKED_IN"
+          ? 409 // 409 Conflict / Duplicate
+          : 400; // Bad request / Invalid
+
       return NextResponse.json(
         {
           success: false,
@@ -49,7 +105,7 @@ export async function POST(request: NextRequest) {
           scanLog: result.scanLog,
           timestamp: new Date().toISOString(),
         },
-        { status: result.rejectionCode === "ALREADY_CHECKED_IN" ? 409 : 400 }
+        { status: statusCode }
       );
     }
 

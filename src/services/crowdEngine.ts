@@ -206,6 +206,7 @@ class SmartCrowdEngineState {
   public scans: VisitorAccessLog[] = [];
   public auditTrail: CrowdAuditRecord[] = [];
   public activeInsideTickets: Map<string, Set<string>> = new Map(); // destination_id -> Set of ticket references inside
+  public ticketIssuanceTimestamps: Map<string, number> = new Map(); // ticket_reference -> issuance timestamp (ms)
 
   private constructor() {
     this.initDefaults();
@@ -433,11 +434,56 @@ export function generateShortTermPredictions(
 // ============================================================================
 // TURNSTILE TICKET SCANNING ENGINE (DUPLICATE DETECTION & AUDIT)
 // ============================================================================
+// 3-HOUR QR CODE EXPIRATION CONFIGURATION & HELPERS
+// ============================================================================
+export const QR_EXPIRY_DURATION_MS = 3 * 60 * 60 * 1000; // 3 Hours (10,800,000 ms)
+
+export function registerTicketIssuance(
+  ticketReference: string,
+  timestampMs: number = Date.now()
+): { issuedAt: string; expiresAt: string; isExpired: boolean; remainingMs: number } {
+  const cleanRef = ticketReference.trim().toUpperCase();
+  const engineState = SmartCrowdEngineState.getInstance();
+  engineState.ticketIssuanceTimestamps.set(cleanRef, timestampMs);
+  const expiresMs = timestampMs + QR_EXPIRY_DURATION_MS;
+  const remainingMs = Math.max(0, expiresMs - Date.now());
+  return {
+    issuedAt: new Date(timestampMs).toISOString(),
+    expiresAt: new Date(expiresMs).toISOString(),
+    isExpired: remainingMs === 0,
+    remainingMs,
+  };
+}
+
+export function getTicketIssuanceInfo(ticketReference: string): {
+  issuedAt: string;
+  expiresAt: string;
+  remainingMs: number;
+  isExpired: boolean;
+} {
+  const cleanRef = ticketReference.trim().toUpperCase();
+  const engineState = SmartCrowdEngineState.getInstance();
+  let issuedMs = engineState.ticketIssuanceTimestamps.get(cleanRef);
+  if (!issuedMs) {
+    issuedMs = Date.now();
+    engineState.ticketIssuanceTimestamps.set(cleanRef, issuedMs);
+  }
+  const expiresMs = issuedMs + QR_EXPIRY_DURATION_MS;
+  const remainingMs = Math.max(0, expiresMs - Date.now());
+  return {
+    issuedAt: new Date(issuedMs).toISOString(),
+    expiresAt: new Date(expiresMs).toISOString(),
+    remainingMs,
+    isExpired: remainingMs === 0,
+  };
+}
+
+// ============================================================================
 
 export interface ScanResult {
   success: boolean;
   message: string;
-  rejectionCode?: "INVALID_TICKET" | "ALREADY_CHECKED_IN" | "NO_ACTIVE_ENTRY" | "CAPACITY_EXCEEDED";
+  rejectionCode?: "INVALID_TICKET" | "ALREADY_CHECKED_IN" | "NO_ACTIVE_ENTRY" | "CAPACITY_EXCEEDED" | "QR_EXPIRED";
   scanLog?: VisitorAccessLog;
   updatedSnapshot?: CrowdLiveSnapshot;
 }
@@ -447,7 +493,11 @@ export async function processTurnstileScan(
   ticketReference: string,
   scanType: "entry" | "exit",
   gateId: string = "GATE-MAIN",
-  deviceId: string = "SCANNER-DEVICE-01"
+  deviceId: string = "SCANNER-DEVICE-01",
+  options?: {
+    customScanTimestampMs?: number;
+    qrIssuedTimestampMs?: number;
+  }
 ): Promise<ScanResult> {
   const cleanRef = ticketReference.trim().toUpperCase();
   if (!cleanRef || cleanRef.length < 5) {
@@ -467,6 +517,46 @@ export async function processTurnstileScan(
       success: false,
       message: "Destination not found.",
       rejectionCode: "INVALID_TICKET",
+    };
+  }
+
+  const nowMs = options?.customScanTimestampMs ?? Date.now();
+  let ticketIssuedMs = options?.qrIssuedTimestampMs ?? state.ticketIssuanceTimestamps.get(cleanRef);
+
+  // If this ticket reference has not been registered yet, auto-register it (unless explicitly simulated)
+  if (!ticketIssuedMs) {
+    ticketIssuedMs = options?.customScanTimestampMs ? options.customScanTimestampMs - 60000 : Date.now();
+    state.ticketIssuanceTimestamps.set(cleanRef, ticketIssuedMs);
+  }
+
+  // 3-HOUR STRICT QR CODE EXPIRATION CHECK:
+  const elapsedMs = nowMs - ticketIssuedMs;
+  if (elapsedMs > QR_EXPIRY_DURATION_MS) {
+    const elapsedHours = (elapsedMs / (60 * 60 * 1000)).toFixed(1);
+    const expiredAtFormatted = new Date(ticketIssuedMs + QR_EXPIRY_DURATION_MS).toLocaleTimeString("en-IN", {
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+    });
+
+    const rejectedLog: VisitorAccessLog = {
+      id: `scan-err-${Date.now()}`,
+      destination_id: config.destination_id,
+      ticket_reference: cleanRef,
+      scan_type: scanType,
+      gate_id: gateId,
+      scanner_device_id: deviceId,
+      scanned_at: new Date(nowMs).toISOString(),
+      is_valid: false,
+      rejection_reason: `QR code expired. Pass validity window is 3 hours (${elapsedHours}h elapsed, expired at ${expiredAtFormatted}).`,
+    };
+    state.scans.unshift(rejectedLog);
+
+    return {
+      success: false,
+      message: `Turnstile Access Denied: QR Code expired. This entry pass was valid for 3 hours and expired at ${expiredAtFormatted}. Please regenerate a fresh QR pass from your reservation voucher.`,
+      rejectionCode: "QR_EXPIRED",
+      scanLog: rejectedLog,
     };
   }
 

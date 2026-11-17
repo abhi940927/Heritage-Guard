@@ -1,5 +1,6 @@
 import { Booking, BookingVisitor, BookingStatus } from "@/types";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { registerTicketIssuance, QR_EXPIRY_DURATION_MS } from "@/services/crowdEngine";
 
 // In-memory runtime store for bookings in fallback/demo environment
 let localBookings: Booking[] = [
@@ -19,7 +20,9 @@ let localBookings: Booking[] = [
     contact_email: "heritage.traveler@example.com",
     contact_phone: "+91 98765 43210",
     visitor_lead_name: "Rahul Sharma",
-    created_at: new Date(Date.now() - 86400000 * 2).toISOString(),
+    created_at: new Date(Date.now() - 3600000).toISOString(),
+    qr_issued_at: new Date(Date.now() - 3600000).toISOString(),
+    qr_expires_at: new Date(Date.now() - 3600000 + QR_EXPIRY_DURATION_MS).toISOString(),
     visitors: [
       {
         full_name: "Rahul Sharma",
@@ -53,7 +56,9 @@ let localBookings: Booking[] = [
     contact_email: "heritage.traveler@example.com",
     contact_phone: "+91 98765 43210",
     visitor_lead_name: "Rahul Sharma",
-    created_at: new Date(Date.now() - 86400000 * 1).toISOString(),
+    created_at: new Date(Date.now() - 1800000).toISOString(),
+    qr_issued_at: new Date(Date.now() - 1800000).toISOString(),
+    qr_expires_at: new Date(Date.now() - 1800000 + QR_EXPIRY_DURATION_MS).toISOString(),
     visitors: [
       {
         full_name: "Rahul Sharma",
@@ -95,8 +100,11 @@ export async function createNewBooking(
       10000 + Math.random() * 90000
     )}`;
 
+    const nowMs = Date.now();
+    const expiresMs = nowMs + QR_EXPIRY_DURATION_MS;
+
     const newBooking: Booking = {
-      id: `bk-${Date.now()}`,
+      id: `bk-${nowMs}`,
       booking_reference: reference,
       user_id: input.userId || "guest-user",
       destination_id: input.destinationId,
@@ -111,7 +119,9 @@ export async function createNewBooking(
       contact_email: input.email,
       contact_phone: input.phone,
       visitor_lead_name: input.leadName,
-      created_at: new Date().toISOString(),
+      created_at: new Date(nowMs).toISOString(),
+      qr_issued_at: new Date(nowMs).toISOString(),
+      qr_expires_at: new Date(expiresMs).toISOString(),
       visitors: input.visitors.map((v) => ({
         full_name: v.fullName,
         age: v.age,
@@ -120,6 +130,9 @@ export async function createNewBooking(
         id_proof_number: v.idProofNumber || "N/A",
       })),
     };
+
+    // Register active 3-hour QR ticket issuance in the crowd engine
+    registerTicketIssuance(reference, nowMs);
 
     // Attempt to persist in Supabase
     try {

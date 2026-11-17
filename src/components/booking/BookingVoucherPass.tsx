@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import QRCode from "qrcode";
 import { Booking } from "@/types";
 import { GlassCard } from "@/components/ui/GlassCard";
@@ -23,6 +23,9 @@ import {
   Printer,
   Sparkles,
   ArrowRight,
+  AlertTriangle,
+  Timer,
+  Lock,
 } from "lucide-react";
 
 interface BookingVoucherPassProps {
@@ -30,22 +33,93 @@ interface BookingVoucherPassProps {
   onBookAnother: () => void;
 }
 
+const THREE_HOURS_MS = 3 * 60 * 60 * 1000;
+
 export const BookingVoucherPass: React.FC<BookingVoucherPassProps> = ({
   booking,
   onBookAnother,
 }) => {
   const [qrDataUrl, setQrDataUrl] = useState<string>("");
-  const [qrToken, setQrToken] = useState<string>(() => `${booking.booking_reference}-${Date.now().toString(36).toUpperCase()}`);
-  const [qrIssuedAt, setQrIssuedAt] = useState<string>(() => new Date().toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", second: "2-digit" }));
+  const [qrToken, setQrToken] = useState<string>(
+    () => `${booking.booking_reference}-${Date.now().toString(36).toUpperCase()}`
+  );
+
+  // 3-Hour QR Expiration State
+  const initialIssuedMs = useMemo(() => {
+    if (booking.qr_issued_at) {
+      return new Date(booking.qr_issued_at).getTime();
+    }
+    return Date.now();
+  }, [booking.qr_issued_at]);
+
+  const [issuedTimestampMs, setIssuedTimestampMs] = useState<number>(initialIssuedMs);
+  const [expiresTimestampMs, setExpiresTimestampMs] = useState<number>(
+    initialIssuedMs + THREE_HOURS_MS
+  );
+  const [remainingSeconds, setRemainingSeconds] = useState<number>(() =>
+    Math.max(0, Math.floor((initialIssuedMs + THREE_HOURS_MS - Date.now()) / 1000))
+  );
+  const [isExpired, setIsExpired] = useState<boolean>(() =>
+    Date.now() >= initialIssuedMs + THREE_HOURS_MS
+  );
+
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
   const [isScannerOpen, setIsScannerOpen] = useState<boolean>(false);
   const [scanNotice, setScanNotice] = useState<string | null>(null);
 
+  // Live 1-second countdown ticker for 3-hour expiration
+  useEffect(() => {
+    const updateTicker = () => {
+      const now = Date.now();
+      const diffMs = expiresTimestampMs - now;
+      if (diffMs <= 0) {
+        setRemainingSeconds(0);
+        setIsExpired(true);
+      } else {
+        setRemainingSeconds(Math.floor(diffMs / 1000));
+        setIsExpired(false);
+      }
+    };
+
+    updateTicker();
+    const interval = setInterval(updateTicker, 1000);
+    return () => clearInterval(interval);
+  }, [expiresTimestampMs]);
+
+  // Format remaining time nicely
+  const formatCountdown = (totalSecs: number) => {
+    if (totalSecs <= 0) return "00h 00m 00s (Expired)";
+    const h = Math.floor(totalSecs / 3600);
+    const m = Math.floor((totalSecs % 3600) / 60);
+    const s = totalSecs % 60;
+    return `${h}h ${m.toString().padStart(2, "0")}m ${s.toString().padStart(2, "0")}s`;
+  };
+
+  const formattedExpiryTime = useMemo(() => {
+    return new Date(expiresTimestampMs).toLocaleTimeString("en-IN", {
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+    });
+  }, [expiresTimestampMs]);
+
+  const formattedIssuedTime = useMemo(() => {
+    return new Date(issuedTimestampMs).toLocaleTimeString("en-IN", {
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+    });
+  }, [issuedTimestampMs]);
+
   // Function to generate high-resolution dynamic QR Code
-  const generateQRCode = async (currentToken: string) => {
+  const generateQRCode = async (
+    currentToken: string,
+    issuedMs: number,
+    expiresMs: number
+  ) => {
     try {
       setIsGenerating(true);
-      // Construct official ticket validation payload
+      // Construct official ticket validation payload with strict 3-hour expiration
       const qrPayload = JSON.stringify({
         ref: booking.booking_reference,
         token: currentToken,
@@ -54,7 +128,9 @@ export const BookingVoucherPass: React.FC<BookingVoucherPassProps> = ({
         slot: booking.slot_label,
         lead: booking.visitor_lead_name,
         count: booking.total_visitors,
-        issued: new Date().toISOString(),
+        issued_at: new Date(issuedMs).toISOString(),
+        expires_at: new Date(expiresMs).toISOString(),
+        validity_window: "3 Hours",
         verifiedBy: "ASI_TURNSTILE_INFORMATICS_DIRECTORATE",
       });
 
@@ -62,7 +138,7 @@ export const BookingVoucherPass: React.FC<BookingVoucherPassProps> = ({
         width: 320,
         margin: 2,
         color: {
-          dark: "#0F172A", // Deep Slate / Obsidian
+          dark: isExpired ? "#475569" : "#0F172A", // Slate if expired, Deep Slate otherwise
           light: "#FFFFFF",
         },
         errorCorrectionLevel: "H",
@@ -76,17 +152,41 @@ export const BookingVoucherPass: React.FC<BookingVoucherPassProps> = ({
     }
   };
 
-  // Generate on initial render
+  // Generate on initial render and when token or timestamps change
   useEffect(() => {
-    generateQRCode(qrToken);
-  }, [booking.booking_reference]);
+    generateQRCode(qrToken, issuedTimestampMs, expiresTimestampMs);
+  }, [booking.booking_reference, qrToken, issuedTimestampMs, expiresTimestampMs]);
 
-  // Handle dynamic QR Code regeneration
-  const handleRegenerateQR = () => {
-    const newToken = `${booking.booking_reference}-${Math.random().toString(36).substring(2, 8).toUpperCase()}-${Date.now().toString(36).toUpperCase()}`;
+  // Handle dynamic QR Code regeneration (resets 3-hour validity timer)
+  const handleRegenerateQR = async () => {
+    const now = Date.now();
+    const newExpires = now + THREE_HOURS_MS;
+    const newToken = `${booking.booking_reference}-${Math.random().toString(36).substring(2, 8).toUpperCase()}-${now.toString(36).toUpperCase()}`;
+
+    // Sync with backend turnstile registry
+    try {
+      await fetch("/api/crowd/scan", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "refresh",
+          ticket_reference: booking.booking_reference,
+          qr_issued_timestamp_ms: now,
+        }),
+      });
+    } catch (e) {
+      console.warn("Failed to sync ticket refresh with server:", e);
+    }
+
     setQrToken(newToken);
-    setQrIssuedAt(new Date().toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", second: "2-digit" }));
-    generateQRCode(newToken);
+    setIssuedTimestampMs(now);
+    setExpiresTimestampMs(newExpires);
+    setRemainingSeconds(Math.floor(THREE_HOURS_MS / 1000));
+    setIsExpired(false);
+    generateQRCode(newToken, now, newExpires);
+
+    setScanNotice("✅ Fresh 3-Hour Gate Pass Generated & Validated!");
+    setTimeout(() => setScanNotice(null), 4000);
   };
 
   // Download QR Code image
@@ -127,6 +227,14 @@ export const BookingVoucherPass: React.FC<BookingVoucherPassProps> = ({
         </p>
       </div>
 
+      {/* Notice Banner if regenerated */}
+      {scanNotice && (
+        <div className="p-3 bg-emerald-50 text-emerald-900 border border-emerald-300 rounded-xl text-xs font-semibold flex items-center gap-2 animate-in fade-in">
+          <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+          <span>{scanNotice}</span>
+        </div>
+      )}
+
       {/* ==================================================================== */}
       {/* CENTRAL DYNAMIC QR CODE DISPLAY BOX                                   */}
       {/* ==================================================================== */}
@@ -141,15 +249,66 @@ export const BookingVoucherPass: React.FC<BookingVoucherPassProps> = ({
               {booking.booking_reference}
             </span>
           </div>
+
+          {/* Real-time Status Badge */}
           <div className="flex items-center gap-2">
-            <span className="px-3 py-1 text-xs font-mono font-bold rounded-xl bg-emerald-600 text-white shadow-sm flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-emerald-200 animate-ping" />
-              Valid for Entry
-            </span>
+            {isExpired ? (
+              <span className="px-3 py-1.5 text-xs font-mono font-bold rounded-xl bg-rose-600 text-white shadow-sm flex items-center gap-1.5 animate-pulse">
+                <AlertTriangle className="w-3.5 h-3.5 text-rose-200" />
+                QR Code Expired
+              </span>
+            ) : remainingSeconds < 1800 ? (
+              <span className="px-3 py-1.5 text-xs font-mono font-bold rounded-xl bg-amber-500 text-white shadow-sm flex items-center gap-1.5">
+                <Timer className="w-3.5 h-3.5 text-amber-100" />
+                Expiring Soon
+              </span>
+            ) : (
+              <span className="px-3 py-1.5 text-xs font-mono font-bold rounded-xl bg-emerald-600 text-white shadow-sm flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-emerald-200 animate-ping" />
+                Valid for Entry (3h)
+              </span>
+            )}
           </div>
         </div>
 
-        {/* Dynamic QR Code Canvas */}
+        {/* 3-Hour Expiration Live Countdown Box */}
+        <div
+          className={`p-3.5 rounded-2xl border text-xs flex flex-col sm:flex-row items-center justify-between gap-2.5 transition-all ${
+            isExpired
+              ? "bg-rose-50 border-rose-300 text-rose-900"
+              : remainingSeconds < 1800
+              ? "bg-amber-100 border-amber-400 text-amber-950"
+              : "bg-emerald-50 border-emerald-300 text-emerald-950"
+          }`}
+        >
+          <div className="flex items-center gap-2 text-left">
+            <Timer
+              className={`w-4 h-4 shrink-0 ${
+                isExpired
+                  ? "text-rose-600"
+                  : remainingSeconds < 1800
+                  ? "text-amber-700 animate-spin"
+                  : "text-emerald-700"
+              }`}
+            />
+            <div>
+              <span className="font-bold block">
+                {isExpired ? "3-Hour QR Code Validity Expired" : "Strict 3-Hour QR Gate Validity Window"}
+              </span>
+              <span className="text-[11px] opacity-85">
+                {isExpired
+                  ? `Expired at ${formattedExpiryTime}. Turnstiles will reject this pass.`
+                  : `Issued: ${formattedIssuedTime} • Valid until: ${formattedExpiryTime}`}
+              </span>
+            </div>
+          </div>
+
+          <div className="font-mono font-black text-sm px-3 py-1 rounded-xl bg-white shadow-xs border border-black/5 whitespace-nowrap">
+            {isExpired ? "00:00:00 EXPIRED" : `⏱️ ${formatCountdown(remainingSeconds)}`}
+          </div>
+        </div>
+
+        {/* Dynamic QR Code Canvas with Expired Overlay */}
         <div className="flex flex-col items-center justify-center py-2 space-y-3">
           <div className="relative p-3 bg-white rounded-2xl shadow-xl border border-slate-200 group">
             {qrDataUrl ? (
@@ -157,7 +316,9 @@ export const BookingVoucherPass: React.FC<BookingVoucherPassProps> = ({
               <img
                 src={qrDataUrl}
                 alt={`Turnstile Entry QR Code for ${booking.booking_reference}`}
-                className="w-52 h-52 sm:w-60 sm:h-60 rounded-xl object-contain"
+                className={`w-52 h-52 sm:w-60 sm:h-60 rounded-xl object-contain transition-all ${
+                  isExpired ? "grayscale opacity-25 filter blur-[1px]" : ""
+                }`}
               />
             ) : (
               <div className="w-52 h-52 sm:w-60 sm:h-60 rounded-xl flex items-center justify-center bg-slate-100 text-slate-400">
@@ -170,18 +331,47 @@ export const BookingVoucherPass: React.FC<BookingVoucherPassProps> = ({
             <div className="absolute top-1.5 right-1.5 w-4 h-4 border-t-2 border-r-2 border-amber-600 rounded-tr" />
             <div className="absolute bottom-1.5 left-1.5 w-4 h-4 border-b-2 border-l-2 border-amber-600 rounded-bl" />
             <div className="absolute bottom-1.5 right-1.5 w-4 h-4 border-b-2 border-r-2 border-amber-600 rounded-br" />
+
+            {/* Expired Watermark Overlay */}
+            {isExpired && (
+              <div className="absolute inset-0 m-3 rounded-xl bg-slate-950/75 backdrop-blur-[2px] flex flex-col items-center justify-center text-white p-4 text-center space-y-2 animate-in fade-in">
+                <div className="w-10 h-10 rounded-full bg-rose-600/90 flex items-center justify-center text-white shadow-lg">
+                  <Lock className="w-5 h-5" />
+                </div>
+                <div>
+                  <span className="font-mono font-black text-sm tracking-widest text-rose-300 uppercase block">
+                    QR PASS EXPIRED
+                  </span>
+                  <span className="text-[11px] text-slate-200 block max-w-[190px]">
+                    Valid for 3 hours only. Turnstile gate entry is currently locked.
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleRegenerateQR}
+                  className="px-3 py-1.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs rounded-lg shadow-md transition-all flex items-center gap-1.5"
+                >
+                  <RefreshCw className="w-3.5 h-3.5" />
+                  <span>Renew for 3h</span>
+                </button>
+              </div>
+            )}
           </div>
 
           {/* Dynamic Token Details */}
           <div className="space-y-1">
             <div className="flex items-center justify-center gap-2 text-xs font-mono font-semibold text-slate-700">
-              <span className="w-2 h-2 rounded-full bg-emerald-500" />
+              <span
+                className={`w-2 h-2 rounded-full ${
+                  isExpired ? "bg-rose-500" : "bg-emerald-500"
+                }`}
+              />
               <span>Token: {qrToken.slice(0, 18)}...</span>
               <span className="text-slate-400">&bull;</span>
-              <span>Issued: {qrIssuedAt}</span>
+              <span>Validity: 3 Hours</span>
             </div>
             <p className="text-[11px] text-slate-500 max-w-sm mx-auto">
-              Present this scannable digital voucher at the turnstile gate scanner. Each scan updates monument carrying capacity in real time.
+              Present this scannable digital voucher at the turnstile gate scanner. QR expires strictly after 3 hours to prevent unauthorized reuse.
             </p>
           </div>
 
@@ -191,17 +381,26 @@ export const BookingVoucherPass: React.FC<BookingVoucherPassProps> = ({
               type="button"
               onClick={handleRegenerateQR}
               disabled={isGenerating}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-amber-300 hover:bg-amber-50 text-amber-900 text-xs font-semibold shadow-sm transition-all"
-              title="Generate a brand new dynamic QR code with fresh security token"
+              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold shadow-sm transition-all ${
+                isExpired
+                  ? "bg-amber-600 text-white hover:bg-amber-700 ring-2 ring-amber-400 animate-bounce"
+                  : "bg-white border border-amber-300 hover:bg-amber-50 text-amber-900"
+              }`}
+              title="Generate a brand new dynamic QR code with fresh 3-hour security window"
             >
-              <RefreshCw className={`w-3.5 h-3.5 text-amber-600 ${isGenerating ? "animate-spin" : ""}`} />
-              <span>Generate New QR Code</span>
+              <RefreshCw
+                className={`w-3.5 h-3.5 ${
+                  isExpired ? "text-white" : "text-amber-600"
+                } ${isGenerating ? "animate-spin" : ""}`}
+              />
+              <span>{isExpired ? "Regenerate Fresh 3-Hour Gate Pass" : "Generate New QR Code"}</span>
             </button>
 
             <button
               type="button"
               onClick={handleDownloadQR}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-semibold shadow-sm transition-all"
+              disabled={isExpired}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-semibold shadow-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Download className="w-3.5 h-3.5 text-slate-600" />
               <span>Save QR Image</span>
@@ -311,7 +510,7 @@ export const BookingVoucherPass: React.FC<BookingVoucherPassProps> = ({
       <div className="p-3.5 bg-blue-50 text-blue-900 rounded-xl text-xs flex items-center gap-2 border border-blue-200">
         <ShieldCheck className="w-4 h-4 text-blue-600 shrink-0" />
         <span>
-          <strong>Simulated Gate Checkout:</strong> This reservation record has been saved to the database. Present your reference number or scan the QR code above at the turnstile.
+          <strong>Simulated Gate Checkout:</strong> This reservation record has been saved to the database. Present your reference number or scan the QR code above at the turnstile. Passes automatically expire after 3 hours.
         </span>
       </div>
 
@@ -342,6 +541,7 @@ export const BookingVoucherPass: React.FC<BookingVoucherPassProps> = ({
           onClose={() => setIsScannerOpen(false)}
           destinationId={booking.destination_id || ""}
           destinationName={booking.destination_name || "Heritage Monument"}
+          initialTicketRef={booking.booking_reference}
           onScanCompleted={() => {
             setScanNotice(`✅ Successfully scanned at ${booking.destination_name || "Monument"} turnstile!`);
             setTimeout(() => setScanNotice(null), 4000);

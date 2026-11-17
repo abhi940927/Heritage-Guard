@@ -19,6 +19,7 @@ interface TurnstileScannerModalProps {
   destinationId: string;
   destinationName: string;
   onScanCompleted: () => void;
+  initialTicketRef?: string;
 }
 
 export const TurnstileScannerModal: React.FC<TurnstileScannerModalProps> = ({
@@ -27,8 +28,11 @@ export const TurnstileScannerModal: React.FC<TurnstileScannerModalProps> = ({
   destinationId,
   destinationName,
   onScanCompleted,
+  initialTicketRef,
 }) => {
-  const [ticketRef, setTicketRef] = useState(`HG-2026-${Math.floor(10000 + Math.random() * 90000)}`);
+  const [ticketRef, setTicketRef] = useState(
+    initialTicketRef || `HG-2026-${Math.floor(10000 + Math.random() * 90000)}`
+  );
   const [scanType, setScanType] = useState<"entry" | "exit">("entry");
   const [gateId, setGateId] = useState("GATE-NORTH-TURNSTILE-01");
   const [isSubmitting, setIsSubmitting] = useState(false);
