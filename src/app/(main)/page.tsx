@@ -51,9 +51,9 @@ export default async function HomePage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(orgSchema) }}
       />
 
-      {/* 1. HERO SECTION */}
-      <section className="relative min-h-[85vh] flex items-center justify-center overflow-hidden">
-        {/* Background Image with Glass Overlay */}
+      {/* 1. HERO SECTION - Full Viewport Coverage (No white cut at bottom) */}
+      <section className="relative min-h-[calc(100vh-5rem)] flex flex-col justify-center items-center overflow-hidden py-16 sm:py-24">
+        {/* Background Image with Glass Overlay covering entire screen */}
         <div className="absolute inset-0 z-0">
           <Image
             src="https://images.unsplash.com/photo-1564507592333-c60657eea523?auto=format&fit=crop&w=2000&q=85"
@@ -64,11 +64,11 @@ export default async function HomePage() {
             className="object-cover object-center scale-105 animate-in fade-in duration-1000"
           />
           <div className="absolute inset-0 hero-gradient-overlay" />
-          <div className="absolute inset-0 bg-radial-gradient from-transparent via-slate-950/40 to-slate-950/80" />
+          <div className="absolute inset-0 bg-radial-gradient from-transparent via-slate-950/40 to-slate-950/85" />
         </div>
 
         {/* Hero Content */}
-        <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-20 text-center text-white space-y-8">
+        <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-white space-y-8 my-auto">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-500/20 backdrop-blur-md border border-amber-400/30 text-amber-300 text-xs font-semibold">
             <Sparkles className="w-3.5 h-3.5" />
             <span>Smart Tourism & Heritage Conservation Framework</span>
@@ -129,6 +129,14 @@ export default async function HomePage() {
             >
               Plan Your Visit
             </Link>
+          </div>
+
+          {/* Subtle Scroll Guide */}
+          <div className="pt-6 flex flex-col items-center justify-center text-xs text-amber-300/80 animate-pulse">
+            <span className="text-[11px] uppercase tracking-wider font-semibold">
+              Explore Live Crowd Telemetry Below
+            </span>
+            <ChevronRight className="w-4 h-4 rotate-90 mt-1" />
           </div>
         </div>
       </section>
