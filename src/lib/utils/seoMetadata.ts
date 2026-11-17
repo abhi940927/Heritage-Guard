@@ -9,7 +9,9 @@ export function generateTouristAttractionSchema(
     "@type": "TouristAttraction",
     name: destination.name,
     description: destination.short_description,
-    image: destination.cover_image_url,
+    image: destination.cover_image_url.startsWith("http")
+      ? destination.cover_image_url
+      : `${siteUrl}${destination.cover_image_url}`,
     url: `${siteUrl}/destinations/${destination.slug}`,
     address: {
       "@type": "PostalAddress",

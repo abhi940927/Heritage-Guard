@@ -97,7 +97,7 @@ export const INITIAL_DESTINATIONS: Destination[] = [
     architecture_details:
       "Fluted five-story minaret with balconies supported by ornate stalactite corbels, Quranic calligraphy, and geometric rosettes carved into sandstone bands.",
     cover_image_url:
-      "https://images.unsplash.com/photo-1588416936097-41850ab3d86d?auto=format&fit=crop&w=1600&q=85",
+      "/images/destinations/qutub-minar.jpg",
     opening_time: "07:00:00",
     closing_time: "19:00:00",
     closed_days: [],
@@ -171,7 +171,7 @@ export const INITIAL_DESTINATIONS: Destination[] = [
     architecture_details:
       "Yellow and pink sandstone with white marble. Four major courtyards including Jaleb Chowk, Ganesh Pol, and the Sheesh Mahal embedded with imported convex mirrors.",
     cover_image_url:
-      "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1600&q=85",
+      "/images/destinations/amer-fort.jpg",
     opening_time: "08:00:00",
     closing_time: "17:30:00",
     closed_days: [],
@@ -246,7 +246,7 @@ export const INITIAL_DESTINATIONS: Destination[] = [
     architecture_details:
       "Monolithic sanctuaries carved into volcanic basalt cliff face overlooking the Waghora river canyon, containing prayer chaityas and viharas.",
     cover_image_url:
-      "https://images.unsplash.com/photo-1576487248805-cf45f6bcc67f?auto=format&fit=crop&w=1600&q=85",
+      "/images/destinations/ajanta-caves.jpg",
     opening_time: "09:00:00",
     closing_time: "17:30:00",
     closed_days: ["Monday"],
@@ -505,7 +505,7 @@ export const INITIAL_DESTINATIONS: Destination[] = [
     architecture_details:
       "Unique blend of Hindu and Islamic architectural motifs. Four open entrances in all cardinal directions symbolize welcome to all humankind.",
     cover_image_url:
-      "https://images.unsplash.com/photo-1595846519845-68e298c2edd8?auto=format&fit=crop&w=1600&q=85",
+      "/images/destinations/golden-temple.jpg",
     opening_time: "00:00:00",
     closing_time: "23:59:59",
     closed_days: [],
