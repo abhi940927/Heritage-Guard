@@ -251,15 +251,6 @@ export const AuthPageContainer: React.FC<AuthPageContainerProps> = ({
     }
   };
 
-  const handleQuickDemoFill = () => {
-    setFullName("Abhinav Singh");
-    setEmail("abhinav.singh@gmail.com");
-    setDob("1998-05-14");
-    setPhone("+91 98765 43210");
-    setPassword("Abhinav123!");
-    setConfirmPassword("Abhinav123!");
-  };
-
   const currentDest = DESTINATION_SHOWCASE[activeSlide];
 
   return (
@@ -587,18 +578,6 @@ export const AuthPageContainer: React.FC<AuthPageContainerProps> = ({
                 </div>
               </div>
 
-              {/* Quick Fill Button for testing */}
-              <div className="flex justify-end pt-1">
-                <button
-                  type="button"
-                  onClick={handleQuickDemoFill}
-                  className="text-[11px] text-amber-700 hover:text-amber-900 font-semibold flex items-center gap-1 underline underline-offset-2"
-                >
-                  <Sparkles className="w-3 h-3" />
-                  Fill &ldquo;Abhinav Singh&rdquo; details
-                </button>
-              </div>
-
               {/* Submit Registration */}
               <Button
                 type="submit"
@@ -673,22 +652,11 @@ export const AuthPageContainer: React.FC<AuthPageContainerProps> = ({
                 </div>
               </div>
 
-              {/* Quick Fill Button */}
-              <div className="flex items-center justify-between pt-1">
+              {/* Security Note */}
+              <div className="pt-1">
                 <span className="text-[10px] text-slate-400">
                   Data securely verified in Supabase
                 </span>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setEmail("abhinav.singh@gmail.com");
-                    setPassword("Abhinav123!");
-                  }}
-                  className="text-[11px] text-amber-700 hover:text-amber-900 font-semibold flex items-center gap-1 underline underline-offset-2"
-                >
-                  <Sparkles className="w-3 h-3" />
-                  Sign in as Abhinav Singh
-                </button>
               </div>
 
               {/* Submit Sign In */}

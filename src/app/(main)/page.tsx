@@ -71,11 +71,6 @@ export default async function HomePage() {
 
         {/* Hero Content */}
         <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-white space-y-8 my-auto">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-500/20 backdrop-blur-md border border-amber-400/30 text-amber-300 text-xs font-semibold">
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>Smart Tourism & Heritage Conservation Framework</span>
-          </div>
-
           <h1 className="font-serif text-4xl sm:text-6xl lg:text-7xl font-bold tracking-tight text-white leading-[1.1]">
             Discover Heritage. <br />
             <span className="gold-gradient-text">Travel Smarter.</span>
