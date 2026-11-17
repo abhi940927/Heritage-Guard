@@ -11,11 +11,11 @@ export const INITIAL_DESTINATIONS: Destination[] = [
     short_description:
       "An ivory-white marble mausoleum on the south bank of the Yamuna river, recognized as the jewel of Mughal art in India.",
     historical_background:
-      "Commissioned in 1631 by the fifth Mughal Emperor Shah Jahan to house the tomb of his beloved empress consort Mumtaz Mahal. Constructed over twenty years with 20,000 artisans under architect Ustad Ahmad Lahori, it represents the emotional and architectural zenith of the Mughal Empire.",
+      "Commissioned in 1631 by Emperor Shah Jahan to house the tomb of Mumtaz Mahal. Built over 20 years with 20,000 artisans under architect Ustad Ahmad Lahori, representing the emotional and architectural zenith of the Mughal Empire.",
     cultural_importance:
-      "A designated UNESCO World Heritage Site since 1983 and voted one of the New 7 Wonders of the World, the Taj Mahal is an international symbol of eternal love and Mughal cultural perfection, welcoming over 6 million tourists annually.",
+      "A designated UNESCO World Heritage Site since 1983 and voted one of the New 7 Wonders of the World, welcoming over 6 million tourists annually.",
     architecture_details:
-      "Constructed entirely from translucent Makrana white marble resting on an elevated plinth. Features a central onion dome rising 73 meters, four detached 40-meter minarets, intricate pietra dura inlay work featuring lapis lazuli and jasper, and classical Persian Charbagh geometric four-part gardens.",
+      "Constructed entirely from Makrana white marble resting on an elevated plinth with an onion dome rising 73 meters, four 40-meter minarets, intricate pietra dura inlays, and geometric Charbagh gardens.",
     cover_image_url:
       "https://images.unsplash.com/photo-1564507592333-c60657eea523?auto=format&fit=crop&w=1600&q=85",
     opening_time: "06:00:00",
@@ -25,7 +25,6 @@ export const INITIAL_DESTINATIONS: Destination[] = [
       "Strict security check at Eastern and Western Gates",
       "Shoe covers or barefoot mandatory on upper marble plinth",
       "Drone cameras and tripods strictly prohibited on grounds",
-      "No food items or plastic bottles allowed past the inner turnstiles",
       "Silence must be maintained inside the main cenotaph chamber",
     ],
     facilities: [
@@ -34,7 +33,6 @@ export const INITIAL_DESTINATIONS: Destination[] = [
       "Official ASI licensed guides",
       "Cloakroom & baggage lockers",
       "Clean RO drinking water stations",
-      "EV golf carts from parking areas",
     ],
     recommended_visit_duration: "2.5 - 3 hours",
     best_visiting_hours: "Sunrise (06:00 - 08:30) or Golden Hour (16:30 - 18:30)",
@@ -54,11 +52,11 @@ export const INITIAL_DESTINATIONS: Destination[] = [
     short_description:
       "The massive red sandstone fortress that served as the primary residence and ceremonial seat of Mughal emperors for two centuries.",
     historical_background:
-      "Constructed by Emperor Shah Jahan between 1638 and 1648 when he relocated the imperial capital from Agra to Delhi. It witnessed the decline of the dynasty, the 1857 First War of Independence, British military occupation, and India's declaration of independence in 1947.",
+      "Constructed by Emperor Shah Jahan between 1638 and 1648 when he relocated the imperial capital from Agra to Delhi. It witnessed the 1857 First War of Independence and India's declaration of independence in 1947.",
     cultural_importance:
-      "A UNESCO World Heritage Site and the symbolic heart of independent India. Every August 15th, the Prime Minister hoists the national tricolor from its historic ramparts and delivers the Independence Day address to the nation.",
+      "A UNESCO World Heritage Site and the symbolic heart of independent India, where the Prime Minister addresses the nation every Independence Day.",
     architecture_details:
-      "Enclosed by 2.41 kilometers of red sandstone defensive walls rising up to 33 meters. Features the colossal Lahori and Delhi Gates, the covered Chhatta Chowk vaulted bazaar, Diwan-i-Aam (Hall of Public Audience), and the Diwan-i-Khas marble pavilion where the Peacock Throne once stood.",
+      "Enclosed by 2.41 km of red sandstone ramparts. Highlights include Lahori Gate, Chhatta Chowk, Diwan-i-Aam, and Diwan-i-Khas marble pavilion.",
     cover_image_url:
       "https://images.unsplash.com/photo-1587474260584-136574528ed5?auto=format&fit=crop&w=1600&q=85",
     opening_time: "09:30:00",
@@ -67,15 +65,13 @@ export const INITIAL_DESTINATIONS: Destination[] = [
     visitor_guidelines: [
       "Mandatory metal detection scanner at Lahori Gate",
       "Keep digital QR ticket ready on mobile phone",
-      "Stay on designated visitor pathways and off fragile lawns",
-      "Commercial filming requires prior written ASI authorization",
+      "Stay on designated visitor pathways",
     ],
     facilities: [
       "Sound & Light show amphitheater",
       "Archaeological museum & Kranti Mandir",
-      "First aid assistance center",
       "Golf carts for senior citizens",
-      "Souvenir counter and cafeteria",
+      "First aid assistance center",
     ],
     recommended_visit_duration: "2 - 2.5 hours",
     best_visiting_hours: "Morning (09:30 - 11:30) or Late Afternoon (15:00 - 17:00)",
@@ -95,26 +91,24 @@ export const INITIAL_DESTINATIONS: Destination[] = [
     short_description:
       "A 72.5-meter tapering victory tower and minaret constructed of red sandstone and marble, anchoring Delhi’s oldest Islamic enclave.",
     historical_background:
-      "Commenced in 1199 CE by Qutb-ud-din Aibak and expanded by successive rulers Shams-ud-din Iltutmish and Alauddin Khalji. The complex encapsulates over five centuries of early Indo-Islamic rule in Northern India.",
+      "Commenced in 1199 CE by Qutb-ud-din Aibak and expanded by Iltutmish and Firoz Shah Tughlaq. The complex encapsulates over five centuries of early Indo-Islamic rule in Northern India.",
     cultural_importance:
-      "A UNESCO World Heritage Site holding monumental historical value, including the miraculous 4th-century CE Iron Pillar of Chandragupta II, which has stood exposed to weather for over 1,600 years without rusting.",
+      "A UNESCO World Heritage Site featuring ancient epigraphy and the 4th-century CE Iron Pillar of Chandragupta II, which has resisted corrosion for over 1,600 years.",
     architecture_details:
-      "A fluted five-story minaret with balconies supported by ornate muqarnas-style stalactite corbels. Elaborate Quranic calligraphy and geometric rosettes carved into sandstone bands.",
+      "Fluted five-story minaret with balconies supported by ornate stalactite corbels, Quranic calligraphy, and geometric rosettes carved into sandstone bands.",
     cover_image_url:
-      "https://images.unsplash.com/photo-1548013146-72479768bbaa?auto=format&fit=crop&w=1600&q=85",
+      "https://images.unsplash.com/photo-1588416936097-41850ab3d86d?auto=format&fit=crop&w=1600&q=85",
     opening_time: "07:00:00",
     closing_time: "19:00:00",
     closed_days: [],
     visitor_guidelines: [
       "Night illumination viewing permitted until 21:00 on select days",
-      "Do not lean against or cross protective barriers around historical ruins",
-      "Stay on designated paved stone walkways",
+      "Do not lean against protective barriers around historical ruins",
     ],
     facilities: [
       "Illuminated evening walking park",
       "Tactile braille markers for visually impaired",
       "Luggage cloakroom",
-      "Restroom facilities and drinking water fountain",
     ],
     recommended_visit_duration: "1.5 - 2 hours",
     best_visiting_hours: "Late Afternoon / Golden Hour (16:00 - 18:30)",
@@ -134,18 +128,18 @@ export const INITIAL_DESTINATIONS: Destination[] = [
     short_description:
       "An extraordinary five-story pyramidal palace facade with 953 delicately carved jharokha honeycomb casements in pink sandstone.",
     historical_background:
-      "Built in 1799 by Maharaja Sawai Pratap Singh and designed by royal architect Lal Chand Ustad in the likeness of the crown of Lord Krishna.",
+      "Built in 1799 by Maharaja Sawai Pratap Singh and designed by Lal Chand Ustad in the likeness of Lord Krishna's crown to allow royal women to observe city life unseen.",
     cultural_importance:
-      "An iconic landmark of Jaipur's UNESCO World Heritage Walled City. It enabled royal women of the court to observe bustling street life and religious processions without violating royal seclusion norms.",
+      "An iconic landmark of Jaipur's UNESCO World Heritage Walled City and a masterpiece of natural air-conditioned palace architecture.",
     architecture_details:
-      "Unique blend of Rajput and Mughal architecture. The five tiers narrow toward the summit, featuring 953 intricately fretted stone windows that generate a natural cooling breeze through the Venturi effect.",
+      "Five tiers with 953 miniature latticed windows that create a natural cooling Venturi breeze during hot Rajasthani summers.",
     cover_image_url:
       "https://images.unsplash.com/photo-1599661046289-e31897846e41?auto=format&fit=crop&w=1600&q=85",
     opening_time: "09:00:00",
     closing_time: "17:00:00",
     closed_days: [],
     visitor_guidelines: [
-      "Upper levels connected by ramps rather than stairs; watch footing",
+      "Upper levels connected by ramps rather than stairs",
       "Composite heritage passes accepted at turnstile",
     ],
     facilities: [
@@ -154,7 +148,7 @@ export const INITIAL_DESTINATIONS: Destination[] = [
       "Filtered water dispenser",
     ],
     recommended_visit_duration: "1 - 1.5 hours",
-    best_visiting_hours: "Morning (09:00 - 10:30) when eastern sunlight illuminates the pink facade",
+    best_visiting_hours: "Morning (09:00 - 10:30) for eastern golden sunlight on facade",
     base_ticket_price: 50,
     current_crowd_level: "High",
     current_crowd_percentage: 82,
@@ -171,13 +165,13 @@ export const INITIAL_DESTINATIONS: Destination[] = [
     short_description:
       "A majestic hilltop fortress overlooking Maota Lake, famous for its grand courtyards and the radiant Sheesh Mahal mirror hall.",
     historical_background:
-      "Built by Raja Man Singh I in 1592 CE on the rugged Aravalli ridge, later enhanced by Mirza Raja Jai Singh before the Kachwaha capital transitioned to Jaipur.",
+      "Constructed by Raja Man Singh I in 1592 CE on the rugged Aravalli ridge, later enhanced by Mirza Raja Jai Singh before the Kachwaha capital transitioned to Jaipur.",
     cultural_importance:
-      "A core part of the UNESCO World Heritage serial site 'Hill Forts of Rajasthan', illustrating the zenith of Rajput military might and royal luxury.",
+      "A core part of the UNESCO World Heritage serial site 'Hill Forts of Rajasthan', illustrating the peak of Rajput military might and royal luxury.",
     architecture_details:
-      "Constructed from yellow and pink sandstone with white marble. Four major courtyards including Jaleb Chowk, Diwan-e-Khas, Ganesh Pol, and the Sheesh Mahal embedded with imported Belgian mirrors that illuminate with a single lamp flame.",
+      "Yellow and pink sandstone with white marble. Four major courtyards including Jaleb Chowk, Ganesh Pol, and the Sheesh Mahal embedded with imported convex mirrors.",
     cover_image_url:
-      "https://images.unsplash.com/photo-1600100397608-f010e42f61e2?auto=format&fit=crop&w=1600&q=85",
+      "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1600&q=85",
     opening_time: "08:00:00",
     closing_time: "17:30:00",
     closed_days: [],
@@ -190,7 +184,6 @@ export const INITIAL_DESTINATIONS: Destination[] = [
       "Jeep transport service from base station",
       "Sound & Light show amphitheater",
       "Heritage dining options inside fort",
-      "Modern restrooms at each courtyard",
     ],
     recommended_visit_duration: "3 - 4 hours",
     best_visiting_hours: "Early Morning (08:00 - 10:30) or Evening Sound Show (17:00 - 19:30)",
@@ -210,26 +203,24 @@ export const INITIAL_DESTINATIONS: Destination[] = [
     short_description:
       "A grand 42-meter triumphal arch war memorial commemorating 84,000 soldiers who laid down their lives during the First World War.",
     historical_background:
-      "Designed by British architect Sir Edwin Lutyens, laid down in 1921 and dedicated in 1931. Following the 1971 war, the Amar Jawan Jyoti was established beneath its arch to symbolize the nation's eternal gratitude.",
+      "Designed by British architect Sir Edwin Lutyens, laid down in 1921 and dedicated in 1931. Following the 1971 war, the Amar Jawan Jyoti was consecrated beneath its arch.",
     cultural_importance:
-      "The premier public gathering plaza of New Delhi and anchor of the ceremonial Kartavya Path boulevard, drawing tens of thousands of citizens and international travelers daily.",
+      "The premier public gathering plaza of New Delhi and anchor of the ceremonial Kartavya Path boulevard, drawing tens of thousands of citizens daily.",
     architecture_details:
-      "Built of red and pale Bharatpur sandstone in triumphal arch form. Engraved with the names of over 13,300 fallen servicemen, crowned by a shallow domed bowl designed for burning ceremonial oil.",
+      "Built of red and pale Bharatpur sandstone in triumphal arch form, inscribed with over 13,300 fallen servicemen's names.",
     cover_image_url:
-      "https://images.unsplash.com/photo-1597040663342-45b6af9d1f5e?auto=format&fit=crop&w=1600&q=85",
+      "https://images.unsplash.com/photo-1524492412937-b28074a5d7da?auto=format&fit=crop&w=1600&q=85",
     opening_time: "00:00:00",
     closing_time: "23:59:59",
     closed_days: [],
     visitor_guidelines: [
-      "Accessible 24 hours daily with round-the-clock security surveillance",
+      "Accessible 24 hours daily with security surveillance",
       "Strict pedestrian-only zones along Kartavya Path canals",
-      "Littering strictly penalized by municipal marshals",
     ],
     facilities: [
       "Underground smart parking complex",
       "Lawn seating & children park zones",
       "Canal water features & public promenades",
-      "Hygienic snack and beverage kiosks",
     ],
     recommended_visit_duration: "1 - 1.5 hours",
     best_visiting_hours: "Dusk to Night (18:30 - 21:30) when illuminated with tri-color LEDs",
@@ -247,28 +238,26 @@ export const INITIAL_DESTINATIONS: Destination[] = [
     state: "Maharashtra",
     category: "Cave Temple",
     short_description:
-      "A serene horseshoe canyon with 30 ancient rock-cut Buddhist cave sanctuaries containing world-renowned ancient fresco paintings.",
+      "A serene horseshoe canyon with 30 ancient rock-cut Buddhist cave sanctuaries containing world-renowned fresco paintings.",
     historical_background:
-      "Hewn between the 2nd century BCE and 480 CE during the Satavahana and Vakataka dynasties. Lost to the jungle until rediscovered by a British officer during a tiger hunt in 1819.",
+      "Hewn between the 2nd century BCE and 480 CE during the Satavahana and Vakataka dynasties. Lost to the jungle until accidentally rediscovered by a British officer in 1819.",
     cultural_importance:
       "A UNESCO World Heritage Site recognized as the crowning achievement of ancient Buddhist religious art, influencing mural traditions throughout Asia.",
     architecture_details:
-      "Monolithic sanctuaries carved into volcanic basalt cliff face overlooking the Waghora river canyon. Comprises prayer halls (chaityas) and monasteries (viharas) adorned with tempera paintings of Jataka tales.",
+      "Monolithic sanctuaries carved into volcanic basalt cliff face overlooking the Waghora river canyon, containing prayer chaityas and viharas.",
     cover_image_url:
-      "https://images.unsplash.com/photo-1609137144829-9e8d7bb57d60?auto=format&fit=crop&w=1600&q=85",
+      "https://images.unsplash.com/photo-1576487248805-cf45f6bcc67f?auto=format&fit=crop&w=1600&q=85",
     opening_time: "09:00:00",
     closing_time: "17:30:00",
     closed_days: ["Monday"],
     visitor_guidelines: [
-      "Camera flash strictly prohibited inside caves to prevent fading of ancient pigments",
+      "Camera flash strictly prohibited inside caves to protect ancient pigments",
       "Take mandatory eco-friendly government shuttle bus from visitor center",
-      "Remove footwear outside specific inner sanctums",
     ],
     facilities: [
       "World-class Ajanta Visitor Interpretation Centre",
       "Air-conditioned shuttle buses",
       "Sedan chair assistance (Doli) for elderly and disabled visitors",
-      "Government tourism cafeteria",
     ],
     recommended_visit_duration: "3.5 - 4.5 hours",
     best_visiting_hours: "Morning (09:00 - 11:30) to avoid afternoon gorge heat",
@@ -290,9 +279,9 @@ export const INITIAL_DESTINATIONS: Destination[] = [
     historical_background:
       "Excavated between the 6th and 10th centuries CE under Rashtrakuta and Yadava patronages. The monolithic Kailash temple was carved top-down from a single cliff face under King Krishna I in the 8th century.",
     cultural_importance:
-      "A UNESCO World Heritage Site celebrating religious harmony, housing Hindu, Buddhist, and Jain monuments carved in unbroken chronological sequence.",
+      "A UNESCO World Heritage Site celebrating religious harmony, housing Hindu, Buddhist, and Jain monuments carved side-by-side in unbroken sequence.",
     architecture_details:
-      "Over 200,000 tons of solid volcanic basalt removed entirely by hand chiseling. The Kailasa temple is twice the size of the Parthenon in Athens with towering multi-tiered gopurams and colossal carved elephants.",
+      "Over 200,000 tons of solid volcanic basalt removed entirely by hand chiseling. The Kailasa temple is twice the area of the Parthenon in Athens.",
     cover_image_url:
       "https://images.unsplash.com/photo-1590050752117-238cb0fb12b1?auto=format&fit=crop&w=1600&q=85",
     opening_time: "06:00:00",
@@ -300,12 +289,11 @@ export const INITIAL_DESTINATIONS: Destination[] = [
     closed_days: ["Tuesday"],
     visitor_guidelines: [
       "Carry ample water and sun protection when walking between cave clusters",
-      "Do not climb upon or touch delicate ancient relief sculptures",
+      "Do not climb upon delicate relief sculptures",
     ],
     facilities: [
       "Golf cart shuttles connecting caves 1 to 34",
       "MTDC heritage cafeteria",
-      "Archaeological reference bookshop",
       "Clean restrooms near Cave 16 central plaza",
     ],
     recommended_visit_duration: "3.5 - 5 hours",
@@ -314,6 +302,303 @@ export const INITIAL_DESTINATIONS: Destination[] = [
     current_crowd_level: "Moderate",
     current_crowd_percentage: 48,
     crowd_trend: "stable",
+    is_featured: false,
+  },
+  {
+    id: "a9999999-9999-9999-9999-999999999999",
+    slug: "gateway-of-india",
+    name: "Gateway of India",
+    location: "Apollo Bandar, Colaba, Mumbai",
+    state: "Maharashtra",
+    category: "Monument",
+    short_description:
+      "An iconic 26-meter basalt triumphal arch overlooking Mumbai Harbour, symbolizing India's colonial maritime gateway and freedom.",
+    historical_background:
+      "Erected to commemorate the landing of King George V and Queen Mary in December 1911. Completed in 1924, it later served as the ceremonial departure point for the last British troops in 1948.",
+    cultural_importance:
+      "The undisputed emblem of Mumbai and departure point for ferries to the UNESCO World Heritage Elephanta Island Caves.",
+    architecture_details:
+      "Designed by Scottish architect George Wittet in the Indo-Saracenic style, blending 16th-century Gujarati architecture with Muslim triumphal arches.",
+    cover_image_url:
+      "https://images.unsplash.com/photo-1570168007204-dfb528c6958f?auto=format&fit=crop&w=1600&q=85",
+    opening_time: "00:00:00",
+    closing_time: "23:59:59",
+    closed_days: [],
+    visitor_guidelines: [
+      "Security scanning prior to entering waterfront promenade",
+      "Licensed ferry counters operate until 17:30 daily",
+    ],
+    facilities: [
+      "Maritime harbor promenade",
+      "Elephanta Island ferry boarding pontoons",
+      "Heritage walking tour starting point",
+    ],
+    recommended_visit_duration: "1 - 1.5 hours",
+    best_visiting_hours: "Sunrise (06:30 - 08:00) or Sunset (17:30 - 19:30)",
+    base_ticket_price: 0,
+    current_crowd_level: "Very High",
+    current_crowd_percentage: 88,
+    crowd_trend: "rising",
+    is_featured: true,
+  },
+  {
+    id: "b1111111-1111-1111-1111-111111111111",
+    slug: "konark-sun-temple",
+    name: "Konark Sun Temple (Black Pagoda)",
+    location: "Konark, Puri District",
+    state: "Odisha",
+    category: "Monument",
+    short_description:
+      "A colossal 13th-century stone chariot dedicated to Surya the Sun God, featuring 24 intricately sculpted celestial wheels.",
+    historical_background:
+      "Built around 1250 CE by King Narasimhadeva I of the Eastern Ganga dynasty. Conceived as a cosmic sun chariot drawn across the skies by seven galloping horses.",
+    cultural_importance:
+      "A UNESCO World Heritage Site celebrated as the pinnacle of Kalinga architectural stone carving, with celestial musicians and erotic sculptures.",
+    architecture_details:
+      "Constructed from Khondalite stone. The 24 monumental wheels function as sundials capable of calculating exact solar time down to minutes.",
+    cover_image_url:
+      "https://images.unsplash.com/photo-1606298855672-3efb63017be8?auto=format&fit=crop&w=1600&q=85",
+    opening_time: "06:00:00",
+    closing_time: "18:00:00",
+    closed_days: [],
+    visitor_guidelines: [
+      "Do not touch or climb the carved sundial stone wheels",
+      "Sound & Light show held daily after 18:30",
+    ],
+    facilities: [
+      "Konark Interpretation Centre and Museum",
+      "Audio guides available in English, Hindi, and Odia",
+      "Electric battery car transit",
+    ],
+    recommended_visit_duration: "2 - 3 hours",
+    best_visiting_hours: "Sunrise (06:00 - 08:30) when first rays strike the temple axis",
+    base_ticket_price: 40,
+    current_crowd_level: "Moderate",
+    current_crowd_percentage: 58,
+    crowd_trend: "stable",
+    is_featured: true,
+  },
+  {
+    id: "b2222222-2222-2222-2222-222222222222",
+    slug: "hampi-monuments",
+    name: "Hampi Group of Monuments",
+    location: "Hampi, Vijayanagara District",
+    state: "Karnataka",
+    category: "Archaeological Site",
+    short_description:
+      "The majestic ruins of the medieval Vijayanagara Empire set against a surreal landscape of giant granite boulders and Tungabhadra riverbanks.",
+    historical_background:
+      "Capital of the glorious Vijayanagara Empire from 1336 to 1565 CE. Described by Portuguese and Persian chroniclers as one of the wealthiest cities in the world.",
+    cultural_importance:
+      "A UNESCO World Heritage Site featuring over 1,600 surviving monuments including the Virupaksha Temple, Lotus Mahal, and the iconic monolithic Stone Chariot.",
+    architecture_details:
+      "Dravidian style infused with Vijayanagara stone masonry. Features musical pillars at Vittala Temple, colossal monolithic statues of Narasimha and Ganesha.",
+    cover_image_url:
+      "https://images.unsplash.com/photo-1596402184320-417e7178b2cd?auto=format&fit=crop&w=1600&q=85",
+    opening_time: "06:00:00",
+    closing_time: "18:00:00",
+    closed_days: [],
+    visitor_guidelines: [
+      "Bicycle and electric cart rentals recommended across 41 sq km site",
+      "Dress respectfully when entering active sanctum of Virupaksha Temple",
+    ],
+    facilities: [
+      "ASI Archaeological Museum at Kamalapura",
+      "Bicycle rental depots across bazaar",
+      "Certified archaeological guides",
+    ],
+    recommended_visit_duration: "1 - 2 Full Days",
+    best_visiting_hours: "Early Morning (06:00 - 09:30) or Sunset atop Matanga Hill",
+    base_ticket_price: 40,
+    current_crowd_level: "Low",
+    current_crowd_percentage: 32,
+    crowd_trend: "stable",
+    is_featured: true,
+  },
+  {
+    id: "b3333333-3333-3333-3333-333333333333",
+    slug: "meenakshi-temple",
+    name: "Meenakshi Amman Temple",
+    location: "Madurai Main, Madurai",
+    state: "Tamil Nadu",
+    category: "Monument",
+    short_description:
+      "A sacred historic Hindu temple complex on the Vaigai River, renowned for its 14 soaring gopuram towers covered in thousands of vibrant mythological sculptures.",
+    historical_background:
+      "Mentioned in Tamil Sangam literature dating back over 2,500 years; rebuilt and expanded by the Nayak dynasty in the 16th and 17th centuries under King Thirumalai Nayak.",
+    cultural_importance:
+      "The spiritual heart of Madurai and one of India's greatest living temple cities, welcoming over 15,000 pilgrims and cultural visitors daily.",
+    architecture_details:
+      "Classic Dravidian architecture featuring the Hall of Thousand Pillars, sacred Golden Lotus tank (Potramarai Kulam), and 14 towering gateway gopurams.",
+    cover_image_url:
+      "https://images.unsplash.com/photo-1582510003544-4d00b7f74220?auto=format&fit=crop&w=1600&q=85",
+    opening_time: "05:00:00",
+    closing_time: "21:30:00",
+    closed_days: [],
+    visitor_guidelines: [
+      "Strict traditional dress code enforced at temple gates",
+      "Mobile phones and leather items must be deposited at security counter",
+    ],
+    facilities: [
+      "Shoe deposit & locker counters",
+      "Special darshan queue management queues",
+      "Temple heritage art museum",
+    ],
+    recommended_visit_duration: "2 - 3 hours",
+    best_visiting_hours: "Early Morning (05:00 - 07:30) or Evening Ceremony (18:30 - 20:30)",
+    base_ticket_price: 50,
+    current_crowd_level: "High",
+    current_crowd_percentage: 84,
+    crowd_trend: "rising",
+    is_featured: true,
+  },
+  {
+    id: "b4444444-4444-4444-4444-444444444444",
+    slug: "victoria-memorial",
+    name: "Victoria Memorial Hall",
+    location: "1, Queen's Way, Maidan, Kolkata",
+    state: "West Bengal",
+    category: "Monument",
+    short_description:
+      "A magnificent white Makrana marble monument and national museum set amidst 64 acres of landscaped gardens in the heart of Kolkata.",
+    historical_background:
+      "Conceived by Lord Curzon in 1901 following Queen Victoria's death; designed by Sir William Emerson and opened to the public in 1921.",
+    cultural_importance:
+      "The premier architectural landmark of Kolkata housing 25 galleries containing rare oil paintings, historical manuscripts, and colonial archives.",
+    architecture_details:
+      "Indo-Saracenic revivalist style using the same white Makrana marble as the Taj Mahal. Topped by a 16-foot bronze Angel of Victory on a rotating ball bearing.",
+    cover_image_url:
+      "https://images.unsplash.com/photo-1558431382-27e303142255?auto=format&fit=crop&w=1600&q=85",
+    opening_time: "10:00:00",
+    closing_time: "17:00:00",
+    closed_days: ["Monday"],
+    visitor_guidelines: [
+      "Garden grounds open earlier from 06:00 to 18:00 daily",
+      "Photography prohibited inside central museum gallery halls",
+    ],
+    facilities: [
+      "Landscaped garden promenades and reflection ponds",
+      "Sound & Light evening show",
+      "Air-conditioned gallery wings & cafeteria",
+    ],
+    recommended_visit_duration: "2 - 2.5 hours",
+    best_visiting_hours: "Late Afternoon (14:30 - 17:00)",
+    base_ticket_price: 50,
+    current_crowd_level: "Moderate",
+    current_crowd_percentage: 60,
+    crowd_trend: "stable",
+    is_featured: false,
+  },
+  {
+    id: "b5555555-5555-5555-5555-555555555555",
+    slug: "golden-temple",
+    name: "Golden Temple (Sri Harmandir Sahib)",
+    location: "Golden Temple Rd, Atta Mandi, Amritsar",
+    state: "Punjab",
+    category: "Monument",
+    short_description:
+      "The holiest gurdwara of Sikhism, a gilded two-story spiritual sanctuary floating in the center of the sacred pool of nectar (Amrit Sarovar).",
+    historical_background:
+      "Founded in 1577 by the fourth Sikh Guru, Guru Ram Das. Maharaja Ranjit Singh overlaid the upper sanctum with 750 kg of pure gold leaf in 1830.",
+    cultural_importance:
+      "A universal beacon of equality, humility, and spiritual peace. Its free community kitchen (Guru ka Langar) feeds over 100,000 visitors daily regardless of faith.",
+    architecture_details:
+      "Unique blend of Hindu and Islamic architectural motifs. Four open entrances in all cardinal directions symbolize welcome to all humankind.",
+    cover_image_url:
+      "https://images.unsplash.com/photo-1595846519845-68e298c2edd8?auto=format&fit=crop&w=1600&q=85",
+    opening_time: "00:00:00",
+    closing_time: "23:59:59",
+    closed_days: [],
+    visitor_guidelines: [
+      "Head covering mandatory for all visitors inside complex",
+      "Remove footwear and wash feet in running water channel at entrance",
+      "Tobacco, alcohol, and non-vegetarian items strictly forbidden",
+    ],
+    facilities: [
+      "24-hour Guru ka Langar community dining hall",
+      "Information office and complimentary luggage storage",
+      "Wheelchair assistance for elderly devotees",
+    ],
+    recommended_visit_duration: "2 - 3 hours",
+    best_visiting_hours: "Night / Dawn (04:00 - 06:00 or 21:00 - 23:00) during Palki Sahib ceremony",
+    base_ticket_price: 0,
+    current_crowd_level: "Very High",
+    current_crowd_percentage: 94,
+    crowd_trend: "rising",
+    is_featured: true,
+  },
+  {
+    id: "b6666666-6666-6666-6666-666666666666",
+    slug: "sanchi-stupa",
+    name: "Buddhist Monuments at Sanchi",
+    location: "Sanchi, Raisen District",
+    state: "Madhya Pradesh",
+    category: "Monument",
+    short_description:
+      "The oldest stone structure in India, a 3rd-century BCE hemispherical Buddhist dome commissioned by Emperor Ashoka.",
+    historical_background:
+      "Commissioned in the 3rd century BCE by Mauryan Emperor Ashoka over relics of Lord Buddha. Expanded under the Shunga and Satavahana dynasties.",
+    cultural_importance:
+      "A UNESCO World Heritage Site recognized as the epicenter of early Buddhist sacred art and architectural evolution.",
+    architecture_details:
+      "Hemispherical stone dome crowned by a chhatri umbrella and surrounded by four ceremonial gateways (toranas) carved with Jataka legends.",
+    cover_image_url:
+      "https://images.unsplash.com/photo-1544735716-392fe2489ffa?auto=format&fit=crop&w=1600&q=85",
+    opening_time: "06:30:00",
+    closing_time: "18:30:00",
+    closed_days: [],
+    visitor_guidelines: [
+      "Proceed around the Great Stupa in clockwise pradakshina direction",
+      "Archaeological museum open 10:00 - 17:00 (closed Fridays)",
+    ],
+    facilities: [
+      "Sanchi Archaeological Site Museum",
+      "Shaded tree-lined walking avenues",
+      "Clean drinking water stations",
+    ],
+    recommended_visit_duration: "2 - 3 hours",
+    best_visiting_hours: "Morning (07:00 - 10:00) or Sunset (16:30 - 18:30)",
+    base_ticket_price: 40,
+    current_crowd_level: "Low",
+    current_crowd_percentage: 22,
+    crowd_trend: "falling",
+    is_featured: false,
+  },
+  {
+    id: "b7777777-7777-7777-7777-777777777777",
+    slug: "padmanabhaswamy-temple",
+    name: "Sree Padmanabhaswamy Temple",
+    location: "Fort, East Fort, Thiruvananthapuram",
+    state: "Kerala",
+    category: "Monument",
+    short_description:
+      "An ancient gold-adorned temple dedicated to Lord Vishnu in Anantha Shayana posture, renowned for its Dravidian-Kerala architecture and vaults.",
+    historical_background:
+      "Celebrated in Sangam literature and Divya Prabandham. The royal Travancore dynasty pledged their sovereignty to the deity, ruling as 'Padmanabhadasa'.",
+    cultural_importance:
+      "Considered the wealthiest temple in the world with historic subterranean vaults holding vast treasures of diamonds, gold, and ancient coins.",
+    architecture_details:
+      "Fusion of Chera and Dravidian architecture featuring a 100-foot, 7-tiered gopuram and a stone corridor supported by 365 carved granite pillars.",
+    cover_image_url:
+      "https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?auto=format&fit=crop&w=1600&q=85",
+    opening_time: "03:30:00",
+    closing_time: "19:30:00",
+    closed_days: [],
+    visitor_guidelines: [
+      "Strict traditional Kerala dress code (Dhoti for men, Saree for women)",
+      "Strict electronic ban inside temple inner perimeter",
+    ],
+    facilities: [
+      "Traditional dhoti rental counters at East Fort",
+      "Cloakroom and safe deposit lockers",
+      "Special queue lanes for senior citizens",
+    ],
+    recommended_visit_duration: "1.5 - 2 hours",
+    best_visiting_hours: "Early Morning (03:30 - 05:00) or Evening (17:00 - 19:00)",
+    base_ticket_price: 50,
+    current_crowd_level: "High",
+    current_crowd_percentage: 76,
+    crowd_trend: "rising",
     is_featured: false,
   },
 ];
@@ -385,64 +670,6 @@ export const INITIAL_TIME_SLOTS: VisitingTimeSlot[] = [
     max_capacity: 3000,
     expected_crowd_level: "Moderate",
   },
-
-  // Amer Fort
-  {
-    id: "ts-amer-1",
-    destination_id: "a5555555-5555-5555-5555-555555555555",
-    start_time: "08:00:00",
-    end_time: "11:00:00",
-    label: "Early Morning Expedition (08:00 - 11:00)",
-    max_capacity: 2500,
-    expected_crowd_level: "Low",
-  },
-  {
-    id: "ts-amer-2",
-    destination_id: "a5555555-5555-5555-5555-555555555555",
-    start_time: "11:30:00",
-    end_time: "14:30:00",
-    label: "Midday Peak (11:30 - 14:30)",
-    max_capacity: 3800,
-    expected_crowd_level: "High",
-  },
-  {
-    id: "ts-amer-3",
-    destination_id: "a5555555-5555-5555-5555-555555555555",
-    start_time: "15:00:00",
-    end_time: "17:30:00",
-    label: "Late Afternoon Sunset (15:00 - 17:30)",
-    max_capacity: 3000,
-    expected_crowd_level: "Moderate",
-  },
-
-  // Qutub Minar
-  {
-    id: "ts-qutub-1",
-    destination_id: "a3333333-3333-3333-3333-333333333333",
-    start_time: "07:00:00",
-    end_time: "11:00:00",
-    label: "Morning Serenity (07:00 - 11:00)",
-    max_capacity: 2000,
-    expected_crowd_level: "Low",
-  },
-  {
-    id: "ts-qutub-2",
-    destination_id: "a3333333-3333-3333-3333-333333333333",
-    start_time: "11:30:00",
-    end_time: "15:30:00",
-    label: "Afternoon Walk (11:30 - 15:30)",
-    max_capacity: 3000,
-    expected_crowd_level: "Moderate",
-  },
-  {
-    id: "ts-qutub-3",
-    destination_id: "a3333333-3333-3333-3333-333333333333",
-    start_time: "16:00:00",
-    end_time: "19:00:00",
-    label: "Sunset & Illumination (16:00 - 19:00)",
-    max_capacity: 3200,
-    expected_crowd_level: "Moderate",
-  },
 ];
 
 export const INITIAL_TICKET_CATEGORIES: TicketCategory[] = [
@@ -453,75 +680,23 @@ export const INITIAL_TICKET_CATEGORIES: TicketCategory[] = [
     category_name: "Indian Citizen",
     price: 50,
     currency: "INR",
-    description: "Standard entry for citizens of the Republic of India (Government ID required)",
+    description: "Standard entry for citizens of India (Government ID required)",
   },
   {
     id: "tc-taj-2",
     destination_id: "a1111111-1111-1111-1111-111111111111",
-    category_name: "SAARC & BIMSTEC Citizen",
-    price: 540,
-    currency: "INR",
-    description: "For passport holders of Bangladesh, Nepal, Bhutan, Sri Lanka, Maldives",
-  },
-  {
-    id: "tc-taj-3",
-    destination_id: "a1111111-1111-1111-1111-111111111111",
     category_name: "Foreign Tourist",
     price: 1100,
     currency: "INR",
-    description: "Includes shoe covers, bottled mineral water, and priority turnstile queue",
+    description: "Includes shoe covers, bottled mineral water, and priority lane",
   },
   {
-    id: "tc-taj-4",
-    destination_id: "a1111111-1111-1111-1111-111111111111",
-    category_name: "Main Mausoleum Add-on",
-    price: 200,
-    currency: "INR",
-    description: "Pass to enter the upper marble terrace and royal cenotaphs",
-  },
-  {
-    id: "tc-taj-5",
+    id: "tc-taj-3",
     destination_id: "a1111111-1111-1111-1111-111111111111",
     category_name: "Child (Below 15 Years)",
     price: 0,
     currency: "INR",
     description: "Complimentary entry with valid age verification proof",
-  },
-
-  // Red Fort
-  {
-    id: "tc-red-1",
-    destination_id: "a2222222-2222-2222-2222-222222222222",
-    category_name: "Indian Citizen",
-    price: 35,
-    currency: "INR",
-    description: "General monument entrance",
-  },
-  {
-    id: "tc-red-2",
-    destination_id: "a2222222-2222-2222-2222-222222222222",
-    category_name: "Foreign Tourist",
-    price: 550,
-    currency: "INR",
-    description: "Full complex and museum access ticket",
-  },
-
-  // Amer Fort
-  {
-    id: "tc-amer-1",
-    destination_id: "a5555555-5555-5555-5555-555555555555",
-    category_name: "Indian Citizen",
-    price: 100,
-    currency: "INR",
-    description: "Fort and palace palace museum admission",
-  },
-  {
-    id: "tc-amer-2",
-    destination_id: "a5555555-5555-5555-5555-555555555555",
-    category_name: "Foreign Tourist",
-    price: 500,
-    currency: "INR",
-    description: "International visitor full access pass",
   },
 ];
 
@@ -596,30 +771,6 @@ export const INITIAL_CROWD_REPORTS: CrowdReport[] = [
     wait_time_minutes: 0,
     entry_rate_per_hour: 2400,
     data_source: "Pedestrian Density Camera Analytics (Simulated Demo)",
-    is_simulated: true,
-  },
-  {
-    id: "cr-7",
-    destination_id: "a7777777-7777-7777-7777-777777777777",
-    destination_name: "Ajanta Rock-Cut Caves",
-    recorded_at: "2026-11-17T08:30:00Z",
-    crowd_level: "Low",
-    crowd_percentage: 24,
-    wait_time_minutes: 5,
-    entry_rate_per_hour: 210,
-    data_source: "Eco Shuttle Transit Telemetry (Simulated Demo)",
-    is_simulated: true,
-  },
-  {
-    id: "cr-8",
-    destination_id: "a8888888-8888-8888-8888-888888888888",
-    destination_name: "Ellora Caves & Kailash Temple",
-    recorded_at: "2026-11-17T08:30:00Z",
-    crowd_level: "Moderate",
-    crowd_percentage: 48,
-    wait_time_minutes: 10,
-    entry_rate_per_hour: 490,
-    data_source: "Cave 16 Turnstile Counter (Simulated Demo)",
     is_simulated: true,
   },
 ];

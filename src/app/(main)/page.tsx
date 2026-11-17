@@ -231,6 +231,34 @@ export default async function HomePage() {
             <DestinationCard key={destination.id} destination={destination} />
           ))}
         </div>
+
+        {/* Prominent See More Banner Card redirecting to /destinations */}
+        <div className="pt-2">
+          <Link
+            href="/destinations"
+            className="group block p-6 sm:p-8 rounded-3xl bg-gradient-to-r from-amber-900 via-slate-900 to-amber-950 text-white border border-amber-400/30 hover:border-amber-400 shadow-xl transition-all duration-300"
+          >
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+              <div className="space-y-2">
+                <span className="inline-flex items-center gap-2 text-xs uppercase font-bold tracking-widest text-amber-400">
+                  <Compass className="w-4 h-4" />
+                  National Archaeological Explorer Directory
+                </span>
+                <h3 className="font-serif text-2xl sm:text-3xl font-bold text-white group-hover:text-amber-200 transition-colors">
+                  Explore All {allDestinations.length} Monitored Heritage Sites
+                </h3>
+                <p className="text-xs sm:text-sm text-slate-300 max-w-2xl leading-relaxed">
+                  Discover cosmic sun chariots, sacred floating gurdwaras, coastal triumphal arches, and Mauryan stupas across 10 Indian states with live crowd telemetry.
+                </p>
+              </div>
+
+              <div className="inline-flex items-center gap-2 px-6 py-3.5 rounded-2xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-sm tracking-wide shrink-0 transition-transform group-hover:translate-x-1 shadow-lg">
+                <span>See More Monuments ({allDestinations.length})</span>
+                <ArrowRight className="w-4 h-4" />
+              </div>
+            </div>
+          </Link>
+        </div>
       </section>
 
       {/* 4. HOW THE PLATFORM WORKS */}
