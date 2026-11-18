@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getRazorpayClient } from "@/lib/razorpay";
+import { createRazorpayOrderDirect } from "@/lib/razorpay";
 import { getCurrentActiveUser } from "@/services/authService";
 
 export async function POST(request: NextRequest) {
@@ -37,11 +37,9 @@ export async function POST(request: NextRequest) {
 
     // Convert amount to Indian Paise (1 INR = 100 Paise)
     const amountInPaise = Math.round(numericAmount * 100);
-
-    const rzp = getRazorpayClient();
     const shortReceipt = `rcpt_${Date.now().toString(36).slice(-8)}`;
 
-    const orderOptions = {
+    const order = await createRazorpayOrderDirect({
       amount: amountInPaise,
       currency: "INR",
       receipt: shortReceipt,
@@ -55,9 +53,7 @@ export async function POST(request: NextRequest) {
         contact_phone: String(phone).slice(0, 20),
         user_id: user.id,
       },
-    };
-
-    const order = await rzp.orders.create(orderOptions);
+    });
 
     const keyId =
       process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID ||
@@ -71,13 +67,13 @@ export async function POST(request: NextRequest) {
       currency: order.currency,
       keyId,
       receipt: order.receipt,
+      isSimulated: order.isSimulated,
     });
   } catch (error: any) {
     console.error("Razorpay order creation error:", error);
     return NextResponse.json(
       {
         error:
-          error?.error?.description ||
           error?.message ||
           "Failed to initialize Razorpay payment order.",
       },
