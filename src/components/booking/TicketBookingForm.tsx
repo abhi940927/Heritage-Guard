@@ -66,6 +66,13 @@ export const TicketBookingForm: React.FC<TicketBookingFormProps> = ({
     initialDestinationSlug || (destinations[0]?.slug ?? "taj-mahal")
   );
 
+  // Sync selected destination whenever URL parameter changes (e.g. from /destinations/taj-mahal)
+  useEffect(() => {
+    if (initialDestinationSlug) {
+      setSelectedSlug(initialDestinationSlug);
+    }
+  }, [initialDestinationSlug]);
+
   const selectedDestination = useMemo(() => {
     return (
       destinations.find((d) => d.slug === selectedSlug) || destinations[0]

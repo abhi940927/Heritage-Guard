@@ -4,8 +4,15 @@ import { cookies } from "next/headers";
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
+export const isServerSupabaseConfigured = Boolean(
+  supabaseUrl &&
+  supabaseAnonKey &&
+  !supabaseUrl.includes("your-project-id") &&
+  !supabaseAnonKey.includes("your-anon")
+);
+
 export async function createServerSupabaseClient() {
-  if (!supabaseUrl || !supabaseAnonKey) {
+  if (!isServerSupabaseConfigured || !supabaseUrl || !supabaseAnonKey) {
     return null;
   }
 
@@ -29,5 +36,3 @@ export async function createServerSupabaseClient() {
     },
   });
 }
-
-export const isServerSupabaseConfigured = Boolean(supabaseUrl && supabaseAnonKey);

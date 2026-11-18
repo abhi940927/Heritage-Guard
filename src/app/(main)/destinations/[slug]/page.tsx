@@ -446,6 +446,34 @@ export default async function DestinationDetailPage({
           </div>
         </div>
       </div>
+
+      {/* Direct Priority Reservation Action Banner */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <GlassCard variant="gold" className="p-8 sm:p-10 text-center relative overflow-hidden rounded-3xl border-2 border-amber-400/80 shadow-2xl">
+          <div className="max-w-2xl mx-auto space-y-4">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-amber-200/60 text-amber-950 text-xs font-bold font-mono uppercase tracking-wider">
+              <Sparkles className="w-3.5 h-3.5 text-amber-700" />
+              <span>Priority Digital Turnstile Pass</span>
+            </div>
+            <h2 className="font-serif text-3xl sm:text-4xl font-bold text-slate-900">
+              Ready to Visit {destination.name}?
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-700 leading-relaxed">
+              Reserve your crowd-managed visiting slot in advance. Scannable digital entry passes with strict 3-hour validity and Razorpay instant checkout are issued immediately upon confirmation.
+            </p>
+            <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-4">
+              <Link
+                href={`/tickets?destination=${destination.slug}`}
+                className="w-full sm:w-auto px-8 py-4 rounded-2xl font-bold text-sm bg-slate-900 hover:bg-slate-800 text-white shadow-xl shadow-slate-900/25 flex items-center justify-center gap-2.5 transition-all hover:scale-[1.02] active:scale-[0.98]"
+              >
+                <Ticket className="w-4 h-4 text-amber-400" />
+                <span>Reserve Tickets for {destination.name} (from {formatCurrency(destination.base_ticket_price)})</span>
+                <ArrowRight className="w-4 h-4 text-amber-400" />
+              </Link>
+            </div>
+          </div>
+        </GlassCard>
+      </div>
     </article>
   );
 }
