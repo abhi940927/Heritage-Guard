@@ -1,4 +1,24 @@
 -- ==============================================================================
+-- Heritage Site Crowd Management System: Complete Master Database Setup
+-- 0. CLEANUP PREVIOUS CONFLICTING TABLES (Fixes 42804 UUID vs TEXT mismatch)
+-- ==============================================================================
+DROP TABLE IF EXISTS public.crowd_audit_trail CASCADE;
+DROP TABLE IF EXISTS public.crowd_predictions CASCADE;
+DROP TABLE IF EXISTS public.crowd_live_snapshots CASCADE;
+DROP TABLE IF EXISTS public.visitor_access_logs CASCADE;
+DROP TABLE IF EXISTS public.destination_crowd_configs CASCADE;
+DROP TABLE IF EXISTS public.booking_visitors CASCADE;
+DROP TABLE IF EXISTS public.bookings CASCADE;
+DROP TABLE IF EXISTS public.ticket_categories CASCADE;
+DROP TABLE IF EXISTS public.visiting_time_slots CASCADE;
+DROP TABLE IF EXISTS public.destination_images CASCADE;
+DROP TABLE IF EXISTS public.saved_destinations CASCADE;
+DROP TABLE IF EXISTS public.crowd_reports CASCADE;
+DROP TABLE IF EXISTS public.contact_messages CASCADE;
+DROP TABLE IF EXISTS public.destinations CASCADE;
+DROP TABLE IF EXISTS public.profiles CASCADE;
+
+-- ==============================================================================
 -- Heritage Site Crowd Management System
 -- Schema Migration: 20260101000000_create_heritage_schema.sql
 -- ==============================================================================
