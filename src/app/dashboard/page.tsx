@@ -1,6 +1,7 @@
 import React from "react";
 import { Metadata } from "next";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { getUserBookings } from "@/services/bookingActions";
 import { getFeaturedDestinations } from "@/services/destinationQueries";
 import { getCurrentActiveUser } from "@/services/authService";
@@ -18,6 +19,8 @@ import {
   CheckCircle2,
 } from "lucide-react";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Explorer Dashboard | Heritage Site Crowd Management",
   description:
@@ -27,14 +30,18 @@ export const metadata: Metadata = {
 export default async function DashboardPage() {
   const activeUser = await getCurrentActiveUser();
 
+  if (!activeUser) {
+    redirect("/login?redirect=/dashboard");
+  }
+
   const userProfile = {
-    id: activeUser?.id || "usr-abhinav-001",
-    full_name: activeUser?.full_name || "Abhinav Singh",
-    email: activeUser?.email || "abhinav.singh@gmail.com",
-    dob: activeUser?.dob || "1998-05-14",
-    phone_number: activeUser?.phone_number || "+91 98765 43210",
-    role: activeUser?.role || "visitor",
-    created_at: activeUser?.created_at || new Date().toISOString(),
+    id: activeUser.id,
+    full_name: activeUser.full_name,
+    email: activeUser.email,
+    dob: activeUser.dob,
+    phone_number: activeUser.phone_number || "",
+    role: activeUser.role,
+    created_at: activeUser.created_at,
   };
 
   const bookings = await getUserBookings(userProfile.email);

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { calibrateCrowdMetrics, getCrowdAuditRecords } from "@/services/crowdEngine";
+import { getCurrentActiveUser, ADMIN_EMAIL } from "@/services/authService";
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -14,6 +15,15 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    // Senior Developer Authorization Check: RBAC validation
+    const user = await getCurrentActiveUser();
+    if (!user || user.role !== "admin") {
+      return NextResponse.json(
+        { error: "Unauthorized: Directorate Administrator privileges required." },
+        { status: 403 }
+      );
+    }
+
     const body = await request.json();
     const {
       destination_id,
@@ -22,8 +32,9 @@ export async function POST(request: NextRequest) {
       thresholds,
       queue_length,
       trend,
-      actor_email = "admin@heritageguard.gov.in",
     } = body;
+
+    const actor_email = user.email || ADMIN_EMAIL;
 
     if (!destination_id) {
       return NextResponse.json(

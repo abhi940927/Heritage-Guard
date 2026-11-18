@@ -2,74 +2,8 @@ import { Booking, BookingVisitor, BookingStatus } from "@/types";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { registerTicketIssuance, QR_EXPIRY_DURATION_MS } from "@/services/crowdEngine";
 
-// In-memory runtime store for bookings in fallback/demo environment
-let localBookings: Booking[] = [
-  {
-    id: "bk-sample-001",
-    booking_reference: "HG-2026-89412",
-    user_id: "demo-user-123",
-    destination_id: "a1111111-1111-1111-1111-111111111111",
-    destination_name: "Taj Mahal",
-    destination_slug: "taj-mahal",
-    time_slot_id: "ts-taj-1",
-    visit_date: "2026-11-25",
-    slot_label: "Sunrise Slot (06:00 - 08:30)",
-    total_visitors: 2,
-    total_amount: 100,
-    status: "confirmed",
-    contact_email: "heritage.traveler@example.com",
-    contact_phone: "+91 98765 43210",
-    visitor_lead_name: "Rahul Sharma",
-    created_at: new Date(Date.now() - 3600000).toISOString(),
-    qr_issued_at: new Date(Date.now() - 3600000).toISOString(),
-    qr_expires_at: new Date(Date.now() - 3600000 + QR_EXPIRY_DURATION_MS).toISOString(),
-    visitors: [
-      {
-        full_name: "Rahul Sharma",
-        age: 32,
-        category_name: "Indian Citizen",
-        id_proof_type: "Aadhaar Card",
-        id_proof_number: "XXXX-XXXX-4512",
-      },
-      {
-        full_name: "Pooja Sharma",
-        age: 29,
-        category_name: "Indian Citizen",
-        id_proof_type: "Passport",
-        id_proof_number: "ZXXXXXX8",
-      },
-    ],
-  },
-  {
-    id: "bk-sample-002",
-    booking_reference: "HG-2026-67129",
-    user_id: "demo-user-123",
-    destination_id: "a2222222-2222-2222-2222-222222222222",
-    destination_name: "Red Fort (Lal Qila)",
-    destination_slug: "red-fort",
-    time_slot_id: "ts-red-1",
-    visit_date: "2026-12-05",
-    slot_label: "Morning Batch (09:30 - 12:00)",
-    total_visitors: 1,
-    total_amount: 35,
-    status: "confirmed",
-    contact_email: "heritage.traveler@example.com",
-    contact_phone: "+91 98765 43210",
-    visitor_lead_name: "Rahul Sharma",
-    created_at: new Date(Date.now() - 1800000).toISOString(),
-    qr_issued_at: new Date(Date.now() - 1800000).toISOString(),
-    qr_expires_at: new Date(Date.now() - 1800000 + QR_EXPIRY_DURATION_MS).toISOString(),
-    visitors: [
-      {
-        full_name: "Rahul Sharma",
-        age: 32,
-        category_name: "Indian Citizen",
-        id_proof_type: "Aadhaar Card",
-        id_proof_number: "XXXX-XXXX-4512",
-      },
-    ],
-  },
-];
+// In-memory runtime store for real user bookings in fallback environment (no demo data)
+let localBookings: Booking[] = [];
 
 export interface CreateBookingInput {
   destinationId: string;
@@ -213,7 +147,13 @@ export async function getUserBookings(
     console.warn("Error fetching user bookings from Supabase:", err);
   }
 
-  // Fallback demo bookings
+  // Fallback memory store: filter strictly by caller identifier
+  if (emailOrUserId) {
+    const clean = emailOrUserId.toLowerCase();
+    return localBookings.filter(
+      (b) => b.user_id === emailOrUserId || b.contact_email?.toLowerCase() === clean
+    );
+  }
   return localBookings;
 }
 

@@ -6,13 +6,26 @@ export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const email = searchParams.get("email") || undefined;
   const isAdmin = searchParams.get("admin") === "true";
+  const user = await getCurrentActiveUser();
 
   if (isAdmin) {
+    if (!user || user.role !== "admin") {
+      return NextResponse.json(
+        { error: "Forbidden: Directorate Administrator role required to view full booking roster." },
+        { status: 403 }
+      );
+    }
     const all = await getAllBookingsAdmin();
     return NextResponse.json(all);
   }
 
-  const bookings = await getUserBookings(email);
+  // Non-admin can only access bookings matching their session email
+  const targetEmail = user?.email || email;
+  if (!targetEmail) {
+    return NextResponse.json([]);
+  }
+
+  const bookings = await getUserBookings(targetEmail);
   return NextResponse.json(bookings);
 }
 
@@ -51,6 +64,14 @@ export async function POST(request: NextRequest) {
 
 export async function PATCH(request: NextRequest) {
   try {
+    const user = await getCurrentActiveUser();
+    if (!user || user.role !== "admin") {
+      return NextResponse.json(
+        { error: "Forbidden: Directorate Administrator role required to modify booking status." },
+        { status: 403 }
+      );
+    }
+
     const body = await request.json();
     const { bookingId, status } = body;
     const success = await updateBookingStatus(bookingId, status);
