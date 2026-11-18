@@ -33,8 +33,13 @@ export async function POST(request: NextRequest) {
     }
 
     // Cryptographic HMAC SHA256 Signature Verification
-    const secret =
-      process.env.RAZORPAY_KEY_SECRET || "xwhNxGdMhPsZeqJfr2lYLKOy";
+    const secret = process.env.RAZORPAY_KEY_SECRET;
+    if (!secret) {
+      return NextResponse.json(
+        { error: "Payment gateway secret not configured on server." },
+        { status: 500 }
+      );
+    }
 
     const dataToVerify = `${razorpay_order_id}|${razorpay_payment_id}`;
     const generatedSignature = crypto

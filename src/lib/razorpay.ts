@@ -3,10 +3,14 @@ import Razorpay from "razorpay";
 export const getRazorpayClient = () => {
   const keyId =
     process.env.RAZORPAY_KEY_ID ||
-    process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID ||
-    "rzp_test_U1eOl0c8ar5xna";
-  const keySecret =
-    process.env.RAZORPAY_KEY_SECRET || "xwhNxGdMhPsZeqJfr2lYLKOy";
+    process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
+  const keySecret = process.env.RAZORPAY_KEY_SECRET;
+
+  if (!keyId || !keySecret) {
+    throw new Error(
+      "Razorpay API credentials not configured in environment variables. Please set RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET."
+    );
+  }
 
   return new Razorpay({
     key_id: keyId,
@@ -40,9 +44,8 @@ export async function createRazorpayOrderDirect(
   const keyId =
     process.env.RAZORPAY_KEY_ID ||
     process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID ||
-    "rzp_test_U1eOl0c8ar5xna";
-  const keySecret =
-    process.env.RAZORPAY_KEY_SECRET || "xwhNxGdMhPsZeqJfr2lYLKOy";
+    "";
+  const keySecret = process.env.RAZORPAY_KEY_SECRET || "";
 
   const basicAuth = Buffer.from(`${keyId}:${keySecret}`).toString("base64");
 

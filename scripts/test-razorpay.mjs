@@ -5,8 +5,13 @@ import Razorpay from "razorpay";
 async function runRazorpayTests() {
   console.log("=== STARTING RAZORPAY INTEGRATION TEST SUITE ===");
 
-  const keyId = "rzp_test_U1eOl0c8ar5xna";
-  const keySecret = "xwhNxGdMhPsZeqJfr2lYLKOy";
+  const keyId = process.env.RAZORPAY_KEY_ID || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
+  const keySecret = process.env.RAZORPAY_KEY_SECRET;
+
+  if (!keyId || !keySecret) {
+    console.log("Razorpay test skipped: Please provide RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET in environment.");
+    return;
+  }
 
   // TEST 1: Initialize SDK & Create Live Test Order with Razorpay Gateway API
   console.log("\n[Test 1] Creating official test order with Razorpay API...");
