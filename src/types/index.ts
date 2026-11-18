@@ -91,6 +91,10 @@ export interface Booking {
   updated_at?: string;
   qr_issued_at?: string;
   qr_expires_at?: string;
+  payment_id?: string;
+  order_id?: string;
+  payment_status?: 'pending' | 'paid' | 'failed' | 'refunded';
+  payment_method?: string;
   visitors?: BookingVisitor[];
   destination?: Destination;
 }

@@ -19,7 +19,26 @@ import {
   Building2,
   Download,
   Share2,
+  CreditCard,
+  Lock,
+  Sparkles,
 } from "lucide-react";
+
+// Client-side dynamic loader for Razorpay checkout SDK
+const loadRazorpayScript = (): Promise<boolean> => {
+  return new Promise((resolve) => {
+    if (typeof window !== "undefined" && (window as any).Razorpay) {
+      resolve(true);
+      return;
+    }
+    const script = document.createElement("script");
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.async = true;
+    script.onload = () => resolve(true);
+    script.onerror = () => resolve(false);
+    document.body.appendChild(script);
+  });
+};
 
 interface TicketBookingFormProps {
   destinations: Destination[];
@@ -297,22 +316,114 @@ export const TicketBookingForm: React.FC<TicketBookingFormProps> = ({
         totalAmount,
       };
 
-      const response = await fetch("/api/bookings", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-
-      if (!response.ok) {
-        throw new Error("Server rejected booking creation");
+      // 1. Ensure Razorpay Checkout SDK is ready
+      const isScriptLoaded = await loadRazorpayScript();
+      if (!isScriptLoaded) {
+        throw new Error(
+          "Could not initialize Razorpay payment gateway. Please ensure you are connected to the internet."
+        );
       }
 
-      const booking: Booking = await response.json();
-      setConfirmedBooking(booking);
-    } catch (err) {
-      console.error(err);
-      setErrorMessage("Unable to complete reservation. Please try again.");
-    } finally {
+      // 2. Initialize official order on backend with Razorpay API
+      const orderResponse = await fetch("/api/payments/create-order", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          amount: totalAmount,
+          destinationName: selectedDestination.name,
+          destinationSlug: selectedDestination.slug,
+          visitDate,
+          slotLabel,
+          leadName,
+          email,
+          phone,
+        }),
+      });
+
+      const orderData = await orderResponse.json();
+      if (!orderResponse.ok || !orderData.orderId) {
+        throw new Error(
+          orderData.error || "Failed to create payment order with Razorpay."
+        );
+      }
+
+      // 3. Launch native Razorpay checkout modal
+      const options = {
+        key: orderData.keyId,
+        amount: orderData.amount,
+        currency: orderData.currency || "INR",
+        name: "Heritage Guard",
+        description: `Archaeological Entry Pass for ${selectedDestination.name}`,
+        order_id: orderData.orderId,
+        image: selectedDestination.cover_image_url || undefined,
+        prefill: {
+          name: leadName,
+          email: email,
+          contact: phone,
+        },
+        theme: {
+          color: "#0F172A", // Deep Obsidian Slate
+        },
+        modal: {
+          ondismiss: () => {
+            setIsSubmitting(false);
+          },
+        },
+        handler: async (paymentResponse: {
+          razorpay_payment_id: string;
+          razorpay_order_id: string;
+          razorpay_signature: string;
+        }) => {
+          try {
+            setIsSubmitting(true);
+            // 4. Verify payment signature on backend and issue dynamic pass
+            const verifyResponse = await fetch("/api/payments/verify", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                razorpay_order_id: paymentResponse.razorpay_order_id,
+                razorpay_payment_id: paymentResponse.razorpay_payment_id,
+                razorpay_signature: paymentResponse.razorpay_signature,
+                bookingPayload: payload,
+              }),
+            });
+
+            const verifyData = await verifyResponse.json();
+            if (!verifyResponse.ok || !verifyData.booking) {
+              throw new Error(
+                verifyData.error || "Payment verification failed with ticketing authority."
+              );
+            }
+
+            setConfirmedBooking(verifyData.booking);
+          } catch (verifyErr: any) {
+            console.error("Payment verification failure:", verifyErr);
+            setErrorMessage(
+              verifyErr.message || "Failed to verify payment with ticketing authority."
+            );
+          } finally {
+            setIsSubmitting(false);
+          }
+        },
+      };
+
+      const razorpayCheckout = new (window as any).Razorpay(options);
+      razorpayCheckout.on("payment.failed", (failResponse: any) => {
+        console.error("Razorpay payment failed:", failResponse);
+        setErrorMessage(
+          failResponse?.error?.description ||
+            failResponse?.error?.reason ||
+            "Payment attempt failed or was rejected by bank."
+        );
+        setIsSubmitting(false);
+      });
+
+      razorpayCheckout.open();
+    } catch (err: any) {
+      console.error("Checkout initiation error:", err);
+      setErrorMessage(
+        err.message || "Unable to proceed to payment. Please try again."
+      );
       setIsSubmitting(false);
     }
   };
@@ -612,7 +723,73 @@ export const TicketBookingForm: React.FC<TicketBookingFormProps> = ({
         </div>
       </GlassCard>
 
-      {/* Step 4: Summary & Instant Confirmation */}
+      {/* Step 4: Payment Method Selection */}
+      <GlassCard className="p-6 space-y-4">
+        <div className="flex items-center justify-between border-b border-slate-200/80 pb-3">
+          <div className="flex items-center gap-2">
+            <span className="w-6 h-6 rounded-full bg-amber-600 text-white flex items-center justify-center text-xs font-bold font-mono">
+              4
+            </span>
+            <h3 className="font-serif font-bold text-slate-900 text-lg">
+              Select Payment Method
+            </h3>
+          </div>
+          <span className="text-[11px] font-mono text-emerald-800 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-300 flex items-center gap-1 font-bold">
+            <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+            256-bit Encrypted
+          </span>
+        </div>
+
+        {/* Razorpay Gateway Card */}
+        <div className="p-5 rounded-2xl border-2 border-amber-500 bg-gradient-to-r from-amber-50/80 via-white to-amber-50/40 relative shadow-sm">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex items-start gap-3.5">
+              <div className="w-12 h-12 rounded-2xl bg-slate-900 text-amber-400 flex items-center justify-center shrink-0 shadow-lg shadow-slate-900/10">
+                <CreditCard className="w-6 h-6" />
+              </div>
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <span className="font-bold text-slate-900 text-base">
+                    Razorpay Secure Payment Gateway
+                  </span>
+                  <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-300">
+                    Active
+                  </span>
+                </div>
+                <p className="text-xs text-slate-600 max-w-lg">
+                  Pay securely using <strong>UPI</strong> (Google Pay, PhonePe, Paytm, BHIM), <strong>Credit / Debit Cards</strong> (Visa, Mastercard, RuPay), or <strong>NetBanking</strong>.
+                </p>
+                <div className="flex flex-wrap items-center gap-2 pt-1 text-[11px] text-slate-600 font-mono">
+                  <span className="px-2 py-0.5 rounded bg-white border border-slate-200 shadow-2xs font-semibold">
+                    UPI / QR
+                  </span>
+                  <span className="px-2 py-0.5 rounded bg-white border border-slate-200 shadow-2xs font-semibold">
+                    Cards
+                  </span>
+                  <span className="px-2 py-0.5 rounded bg-white border border-slate-200 shadow-2xs font-semibold">
+                    NetBanking
+                  </span>
+                  <span className="px-2 py-0.5 rounded bg-white border border-slate-200 shadow-2xs font-semibold">
+                    Wallets
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div className="shrink-0 flex sm:flex-col items-center sm:items-end justify-between border-t sm:border-t-0 pt-3 sm:pt-0 border-amber-200/60">
+              <span className="text-xs font-bold text-emerald-700 flex items-center gap-1">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                Selected
+              </span>
+              <span className="text-[10px] font-mono text-slate-400">
+                Testnet Enabled
+              </span>
+            </div>
+          </div>
+        </div>
+      </GlassCard>
+
+      {/* Step 5: Summary & Instant Confirmation */}
       <GlassCard variant="gold" className="p-6 space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-amber-300/80 pb-4">
           <div>
@@ -636,7 +813,7 @@ export const TicketBookingForm: React.FC<TicketBookingFormProps> = ({
 
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-2">
           <p className="text-xs text-amber-900/80 max-w-md">
-            By confirming, you agree to official Archaeological Survey of India (ASI) visitor guidelines. Digital QR passes will be generated immediately upon reservation.
+            Clicking the button below will open the secure <strong>Razorpay checkout</strong>. Digital 3-hour QR passes are generated automatically upon verified transaction.
           </p>
 
           <Button
@@ -644,10 +821,10 @@ export const TicketBookingForm: React.FC<TicketBookingFormProps> = ({
             size="lg"
             variant="primary"
             isLoading={isSubmitting}
-            className="w-full sm:w-auto px-8"
+            className="w-full sm:w-auto px-8 bg-slate-900 hover:bg-slate-800 text-white shadow-xl shadow-slate-900/20"
           >
-            <Ticket className="w-5 h-5 mr-2" />
-            Generate Entry Pass (Demo)
+            <Lock className="w-4 h-4 mr-2 text-amber-400" />
+            <span>Pay {formatCurrency(totalAmount)} with Razorpay</span>
           </Button>
         </div>
       </GlassCard>

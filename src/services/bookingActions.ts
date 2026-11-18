@@ -90,6 +90,10 @@ export interface CreateBookingInput {
   }[];
   totalAmount: number;
   userId?: string;
+  paymentId?: string;
+  orderId?: string;
+  paymentStatus?: 'pending' | 'paid' | 'failed' | 'refunded';
+  paymentMethod?: string;
 }
 
 export async function createNewBooking(
@@ -122,6 +126,10 @@ export async function createNewBooking(
       created_at: new Date(nowMs).toISOString(),
       qr_issued_at: new Date(nowMs).toISOString(),
       qr_expires_at: new Date(expiresMs).toISOString(),
+      payment_id: input.paymentId,
+      order_id: input.orderId,
+      payment_status: input.paymentStatus || (input.paymentId ? "paid" : "pending"),
+      payment_method: input.paymentMethod || "Razorpay",
       visitors: input.visitors.map((v) => ({
         full_name: v.fullName,
         age: v.age,

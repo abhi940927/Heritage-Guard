@@ -466,11 +466,17 @@ export const BookingVoucherPass: React.FC<BookingVoucherPassProps> = ({
 
           <div className="p-2.5 rounded-xl bg-white/80">
             <span className="text-slate-400 text-[10px] uppercase font-bold block">
-              Amount Paid (Demo)
+              Payment Status
             </span>
-            <span className="font-bold text-slate-900 text-xs">
-              {formatCurrency(booking.total_amount)}
-            </span>
+            <div className="flex items-center gap-1 font-bold text-emerald-700 text-xs">
+              <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+              <span>Paid via Razorpay</span>
+            </div>
+            {booking.payment_id && (
+              <span className="text-[10px] font-mono text-slate-500 block truncate" title={booking.payment_id}>
+                {booking.payment_id}
+              </span>
+            )}
           </div>
         </div>
 
