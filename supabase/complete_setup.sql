@@ -224,10 +224,21 @@ ALTER TABLE public.crowd_reports ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.saved_destinations ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.contact_messages ENABLE ROW LEVEL SECURITY;
 
--- Profiles: Anyone authenticated can view their own; Admins can view and edit all
+-- Security Definer function to check admin role without triggering RLS recursion
+CREATE OR REPLACE FUNCTION public.is_admin()
+RETURNS boolean AS $$
+BEGIN
+  RETURN EXISTS (
+    SELECT 1 FROM public.profiles
+    WHERE id = auth.uid() AND role = 'admin'
+  );
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
+
+-- Profiles: Anyone authenticated can view their own; Admins can view all
 DROP POLICY IF EXISTS "Public profiles are readable by owner and admins" ON public.profiles;
 CREATE POLICY "Public profiles are readable by owner and admins" ON public.profiles FOR SELECT
-    USING (auth.uid() = id OR (SELECT role FROM public.profiles WHERE id = auth.uid()) = 'admin');
+    USING (auth.uid() = id OR public.is_admin());
 
 DROP POLICY IF EXISTS "Users can update their own profile" ON public.profiles;
 CREATE POLICY "Users can update their own profile" ON public.profiles FOR UPDATE
@@ -238,34 +249,41 @@ DROP POLICY IF EXISTS "Destinations are viewable by everyone" ON public.destinat
 CREATE POLICY "Destinations are viewable by everyone" ON public.destinations FOR SELECT USING (true);
 
 DROP POLICY IF EXISTS "Destinations can be modified by admins only" ON public.destinations;
-CREATE POLICY "Destinations can be modified by admins only" ON public.destinations FOR ALL
-    USING ((SELECT role FROM public.profiles WHERE id = auth.uid()) = 'admin');
+DROP POLICY IF EXISTS "Destinations insert by admin" ON public.destinations;
+DROP POLICY IF EXISTS "Destinations update by admin" ON public.destinations;
+DROP POLICY IF EXISTS "Destinations delete by admin" ON public.destinations;
+CREATE POLICY "Destinations insert by admin" ON public.destinations FOR INSERT WITH CHECK (public.is_admin());
+CREATE POLICY "Destinations update by admin" ON public.destinations FOR UPDATE USING (public.is_admin());
+CREATE POLICY "Destinations delete by admin" ON public.destinations FOR DELETE USING (public.is_admin());
 
 DROP POLICY IF EXISTS "Destination images are viewable by everyone" ON public.destination_images;
 CREATE POLICY "Destination images are viewable by everyone" ON public.destination_images FOR SELECT USING (true);
 
 DROP POLICY IF EXISTS "Destination images managed by admin" ON public.destination_images;
-CREATE POLICY "Destination images managed by admin" ON public.destination_images FOR ALL
-    USING ((SELECT role FROM public.profiles WHERE id = auth.uid()) = 'admin');
+CREATE POLICY "Destination images insert by admin" ON public.destination_images FOR INSERT WITH CHECK (public.is_admin());
+CREATE POLICY "Destination images update by admin" ON public.destination_images FOR UPDATE USING (public.is_admin());
+CREATE POLICY "Destination images delete by admin" ON public.destination_images FOR DELETE USING (public.is_admin());
 
 DROP POLICY IF EXISTS "Ticket categories viewable by everyone" ON public.ticket_categories;
 CREATE POLICY "Ticket categories viewable by everyone" ON public.ticket_categories FOR SELECT USING (true);
 
 DROP POLICY IF EXISTS "Ticket categories managed by admin" ON public.ticket_categories;
-CREATE POLICY "Ticket categories managed by admin" ON public.ticket_categories FOR ALL
-    USING ((SELECT role FROM public.profiles WHERE id = auth.uid()) = 'admin');
+CREATE POLICY "Ticket categories insert by admin" ON public.ticket_categories FOR INSERT WITH CHECK (public.is_admin());
+CREATE POLICY "Ticket categories update by admin" ON public.ticket_categories FOR UPDATE USING (public.is_admin());
+CREATE POLICY "Ticket categories delete by admin" ON public.ticket_categories FOR DELETE USING (public.is_admin());
 
 DROP POLICY IF EXISTS "Time slots viewable by everyone" ON public.visiting_time_slots;
 CREATE POLICY "Time slots viewable by everyone" ON public.visiting_time_slots FOR SELECT USING (true);
 
 DROP POLICY IF EXISTS "Time slots managed by admin" ON public.visiting_time_slots;
-CREATE POLICY "Time slots managed by admin" ON public.visiting_time_slots FOR ALL
-    USING ((SELECT role FROM public.profiles WHERE id = auth.uid()) = 'admin');
+CREATE POLICY "Time slots insert by admin" ON public.visiting_time_slots FOR INSERT WITH CHECK (public.is_admin());
+CREATE POLICY "Time slots update by admin" ON public.visiting_time_slots FOR UPDATE USING (public.is_admin());
+CREATE POLICY "Time slots delete by admin" ON public.visiting_time_slots FOR DELETE USING (public.is_admin());
 
--- Bookings & Visitors: Users can view their own bookings; Admins view all; Any user (authenticated or guest with valid session) can create
+-- Bookings & Visitors: Users can view their own bookings; Admins view all; Any user can create
 DROP POLICY IF EXISTS "Users can view their own bookings" ON public.bookings;
 CREATE POLICY "Users can view their own bookings" ON public.bookings FOR SELECT
-    USING (auth.uid() = user_id OR (SELECT role FROM public.profiles WHERE id = auth.uid()) = 'admin');
+    USING (auth.uid() = user_id OR public.is_admin());
 
 DROP POLICY IF EXISTS "Anyone can create a booking" ON public.bookings;
 CREATE POLICY "Anyone can create a booking" ON public.bookings FOR INSERT
@@ -273,7 +291,7 @@ CREATE POLICY "Anyone can create a booking" ON public.bookings FOR INSERT
 
 DROP POLICY IF EXISTS "Admins can update bookings" ON public.bookings;
 CREATE POLICY "Admins can update bookings" ON public.bookings FOR UPDATE
-    USING ((SELECT role FROM public.profiles WHERE id = auth.uid()) = 'admin');
+    USING (public.is_admin());
 
 DROP POLICY IF EXISTS "Users can view their booking visitors" ON public.booking_visitors;
 CREATE POLICY "Users can view their booking visitors" ON public.booking_visitors FOR SELECT
