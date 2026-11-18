@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { ADMIN_EMAIL } from "@/services/authService";
+import { getBaseUrl } from "@/lib/utils/url";
 
 export async function GET(request: NextRequest) {
-  const { searchParams, origin } = new URL(request.url);
+  const { searchParams } = new URL(request.url);
+  const baseUrl = getBaseUrl(request);
   const code = searchParams.get("code");
   const redirectTarget = searchParams.get("redirect") || searchParams.get("next") || "/dashboard";
 
@@ -30,7 +32,7 @@ export async function GET(request: NextRequest) {
             console.warn("Could not upsert OAuth profile:", profileErr);
           }
 
-          const response = NextResponse.redirect(new URL(redirectTarget, origin));
+          const response = NextResponse.redirect(new URL(redirectTarget, baseUrl));
 
           // Set secure session cookie
           response.cookies.set("hg_user_email", userEmail, {
@@ -51,6 +53,6 @@ export async function GET(request: NextRequest) {
 
   // Fallback to login with error parameter
   return NextResponse.redirect(
-    new URL(`/login?error=oauth_failed&redirect=${encodeURIComponent(redirectTarget)}`, origin)
+    new URL(`/login?error=oauth_failed&redirect=${encodeURIComponent(redirectTarget)}`, baseUrl)
   );
 }

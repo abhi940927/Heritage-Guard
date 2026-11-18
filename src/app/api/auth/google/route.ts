@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerSupabaseClient, isServerSupabaseConfigured } from "@/lib/supabase/server";
 import { ADMIN_EMAIL, ADMIN_NAME, ADMIN_PHONE, ADMIN_DOB } from "@/services/authService";
+import { getBaseUrl } from "@/lib/utils/url";
 
 export async function GET(request: NextRequest) {
-  const { searchParams, origin } = new URL(request.url);
+  const { searchParams } = new URL(request.url);
+  const baseUrl = getBaseUrl(request);
   const redirectTarget = searchParams.get("redirect") || "/dashboard";
-  const callbackUrl = `${origin}/auth/callback?redirect=${encodeURIComponent(redirectTarget)}`;
+  const callbackUrl = `${baseUrl}/auth/callback?redirect=${encodeURIComponent(redirectTarget)}`;
 
   if (isServerSupabaseConfigured) {
     try {
@@ -36,7 +38,7 @@ export async function GET(request: NextRequest) {
   return NextResponse.redirect(
     new URL(
       `/login?redirect=${encodeURIComponent(redirectTarget)}&notice=google_provider_setup`,
-      origin
+      baseUrl
     )
   );
 }
