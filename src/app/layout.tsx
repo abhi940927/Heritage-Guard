@@ -71,6 +71,25 @@ export default function RootLayout({
     <html lang="en" className="h-full scroll-smooth">
       <head>
         <link rel="icon" href="/favicon.ico" sizes="any" />
+        {/* Auto-reloader for stale client chunks after server rebuilds */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.addEventListener('error', function(e) {
+                var msg = (e && e.message) ? e.message.toLowerCase() : '';
+                if (msg.indexOf('loading chunk') !== -1 || msg.indexOf('failed to fetch') !== -1 || msg.indexOf('network error') !== -1) {
+                  window.location.reload();
+                }
+              });
+              window.addEventListener('unhandledrejection', function(e) {
+                var reason = (e && e.reason && e.reason.message) ? e.reason.message.toLowerCase() : '';
+                if (reason.indexOf('loading chunk') !== -1 || reason.indexOf('failed to fetch') !== -1 || reason.indexOf('network error') !== -1) {
+                  window.location.reload();
+                }
+              });
+            `,
+          }}
+        />
       </head>
       <body className="min-h-screen flex flex-col bg-[#FAF8F5] text-slate-900 antialiased selection:bg-amber-100 selection:text-amber-900">
         {children}
