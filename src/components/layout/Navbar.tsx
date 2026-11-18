@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, Suspense } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { siteConfig } from "@/config/site";
 import {
   Landmark,
@@ -19,13 +19,63 @@ import {
   ArrowRight,
   Sparkles,
   MapPin,
+  LogOut,
+  UserCheck,
 } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
+import { AuthNotificationToast } from "@/components/auth/AuthNotificationToast";
+
+interface UserSessionInfo {
+  id: string;
+  email: string;
+  full_name: string;
+  avatar_url?: string;
+  role: string;
+}
 
 export const Navbar: React.FC = () => {
   const pathname = usePathname();
+  const router = useRouter();
   const [navMenuOpen, setNavMenuOpen] = useState(false);
+  const [currentUser, setCurrentUser] = useState<UserSessionInfo | null>(null);
+  const [loggingOut, setLoggingOut] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+
+  // Fetch active user session
+  const checkUserSession = async () => {
+    try {
+      const res = await fetch("/api/auth/me", { cache: "no-store" });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.authenticated && data.user) {
+          setCurrentUser(data.user);
+          return;
+        }
+      }
+      setCurrentUser(null);
+    } catch {
+      setCurrentUser(null);
+    }
+  };
+
+  useEffect(() => {
+    checkUserSession();
+  }, [pathname]);
+
+  const handleLogout = async () => {
+    setLoggingOut(true);
+    try {
+      await fetch("/api/auth/logout", { method: "POST" });
+      setCurrentUser(null);
+      setNavMenuOpen(false);
+      router.push("/");
+      router.refresh();
+    } catch (err) {
+      console.error("Logout error:", err);
+    } finally {
+      setLoggingOut(false);
+    }
+  };
 
   // Close menu on route change
   useEffect(() => {
@@ -62,6 +112,11 @@ export const Navbar: React.FC = () => {
 
   return (
     <header className="sticky top-0 z-50 w-full glass-nav transition-all duration-300">
+      {/* Real-time Authentication Success Toast Banner */}
+      <Suspense fallback={null}>
+        <AuthNotificationToast />
+      </Suspense>
+
       {/* Full width container with side padding so logo sits on the side */}
       <div className="w-full px-4 sm:px-8 lg:px-12 xl:px-16" ref={menuRef}>
         <div className="flex items-center justify-between h-20">
@@ -83,14 +138,43 @@ export const Navbar: React.FC = () => {
             </div>
           </Link>
 
-          {/* Right Action Elements: Clickable Navigation Trigger & Book Slot CTA */}
-          <div className="flex items-center gap-3 sm:gap-4">
+          {/* Right Action Elements: Clickable Navigation Trigger, User Profile & Book Slot CTA */}
+          <div className="flex items-center gap-2.5 sm:gap-4">
+            {/* Active User Quick Profile Badge */}
+            {currentUser && (
+              <Link
+                href="/dashboard"
+                className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-amber-50/90 hover:bg-amber-100 border border-amber-200/80 text-amber-950 font-semibold text-xs transition-all shadow-sm"
+                title="Go to Visitor Dashboard"
+              >
+                {currentUser.avatar_url ? (
+                  <img
+                    src={currentUser.avatar_url}
+                    alt={currentUser.full_name}
+                    className="w-5 h-5 rounded-full object-cover border border-amber-400"
+                  />
+                ) : (
+                  <div className="w-5 h-5 rounded-full bg-amber-700 text-white flex items-center justify-center text-[10px] font-bold">
+                    {currentUser.full_name.charAt(0).toUpperCase()}
+                  </div>
+                )}
+                <span className="hidden md:inline max-w-[110px] truncate">
+                  {currentUser.full_name.split(" ")[0]}
+                </span>
+                {currentUser.role === "admin" && (
+                  <span className="px-1.5 py-0.2 rounded text-[9px] bg-slate-900 text-amber-300 font-bold uppercase tracking-wider">
+                    Admin
+                  </span>
+                )}
+              </Link>
+            )}
+
             {/* Navigation Toggle Button */}
             <button
               onClick={() => setNavMenuOpen(!navMenuOpen)}
               type="button"
               className={cn(
-                "flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold transition-all duration-200 border cursor-pointer select-none",
+                "flex items-center gap-2 px-3.5 sm:px-4 py-2.5 rounded-xl text-xs font-semibold transition-all duration-200 border cursor-pointer select-none",
                 navMenuOpen
                   ? "bg-slate-900 text-white border-slate-900 shadow-md ring-2 ring-amber-500/30"
                   : "bg-white/80 hover:bg-amber-50/80 text-slate-800 border-slate-300/80 hover:border-amber-400"
@@ -116,7 +200,7 @@ export const Navbar: React.FC = () => {
             {/* Direct Primary Call To Action */}
             <Link
               href="/tickets"
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold text-white bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-500 hover:to-amber-600 shadow-md shadow-amber-600/20 active:scale-[0.98] transition-all shrink-0"
+              className="inline-flex items-center gap-2 px-3.5 sm:px-4 py-2.5 rounded-xl text-xs font-semibold text-white bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-500 hover:to-amber-600 shadow-md shadow-amber-600/20 active:scale-[0.98] transition-all shrink-0"
             >
               <Ticket className="w-4 h-4" />
               <span>Book Slot</span>
@@ -298,21 +382,59 @@ export const Navbar: React.FC = () => {
                 </div>
               </div>
 
-              {/* Bottom Quick Row */}
+              {/* Bottom Quick Row: Authentication & Official Directorate */}
               <div className="mt-6 pt-4 border-t border-slate-200/80 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500">
                 <span className="flex items-center gap-1.5 text-amber-800 font-medium">
                   <Sparkles className="w-3.5 h-3.5 text-amber-600" />
                   National Archaeological & Monument Informatics Directorate
                 </span>
-                <div className="flex items-center gap-4">
-                  <Link href="/login" className="hover:text-amber-800 font-semibold">
-                    Sign In
-                  </Link>
-                  <span>•</span>
-                  <Link href="/register" className="hover:text-amber-800 font-semibold">
-                    Register Explorer Account
-                  </Link>
-                </div>
+
+                {currentUser ? (
+                  <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end">
+                    <div className="flex items-center gap-2">
+                      {currentUser.avatar_url ? (
+                        <img
+                          src={currentUser.avatar_url}
+                          alt={currentUser.full_name}
+                          className="w-6 h-6 rounded-full object-cover border border-amber-300"
+                        />
+                      ) : (
+                        <div className="w-6 h-6 rounded-full bg-amber-700 text-white flex items-center justify-center text-[10px] font-bold">
+                          {currentUser.full_name.charAt(0).toUpperCase()}
+                        </div>
+                      )}
+                      <span className="font-semibold text-slate-800">
+                        {currentUser.full_name}
+                      </span>
+                    </div>
+                    <span className="text-slate-300 hidden sm:inline">•</span>
+                    <Link
+                      href="/dashboard"
+                      className="text-amber-800 font-semibold hover:underline"
+                    >
+                      Dashboard
+                    </Link>
+                    <span className="text-slate-300">•</span>
+                    <button
+                      onClick={handleLogout}
+                      disabled={loggingOut}
+                      className="inline-flex items-center gap-1 text-rose-600 hover:text-rose-800 font-semibold transition-colors"
+                    >
+                      <LogOut className="w-3.5 h-3.5" />
+                      <span>{loggingOut ? "Signing out..." : "Sign Out"}</span>
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-4">
+                    <Link href="/login" className="hover:text-amber-800 font-semibold">
+                      Sign In
+                    </Link>
+                    <span>•</span>
+                    <Link href="/register" className="hover:text-amber-800 font-semibold">
+                      Register Explorer Account
+                    </Link>
+                  </div>
+                )}
               </div>
             </div>
           </div>

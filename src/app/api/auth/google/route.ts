@@ -6,7 +6,7 @@ import { getBaseUrl } from "@/lib/utils/url";
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const baseUrl = getBaseUrl(request);
-  const redirectTarget = searchParams.get("redirect") || "/dashboard";
+  const redirectTarget = searchParams.get("redirect") || "/";
   const callbackUrl = `${baseUrl}/auth/callback?redirect=${encodeURIComponent(redirectTarget)}`;
 
   if (isServerSupabaseConfigured) {

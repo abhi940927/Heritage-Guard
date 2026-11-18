@@ -8,6 +8,7 @@ export interface StoredUser {
   passwordHash: string; // Salted cryptographic hash
   full_name: string;
   dob: string;
+  avatar_url?: string;
   phone_number?: string;
   role: "visitor" | "admin" | "staff";
   created_at: string;
@@ -274,9 +275,10 @@ export async function getCurrentActiveUser(): Promise<SafeUser | null> {
           id: data.user.id,
           email: data.user.email,
           full_name: profile?.full_name || data.user.user_metadata?.full_name || (isUserAdmin ? ADMIN_NAME : "Explorer"),
+          avatar_url: profile?.avatar_url || data.user.user_metadata?.avatar_url || data.user.user_metadata?.picture || "",
           dob: profile?.dob || data.user.user_metadata?.dob || (isUserAdmin ? ADMIN_DOB : ""),
           phone_number: profile?.phone_number || data.user.user_metadata?.phone_number || (isUserAdmin ? ADMIN_PHONE : ""),
-          role: isUserAdmin ? "admin" : "visitor",
+          role: isUserAdmin ? "admin" : (profile?.role || "visitor"),
           created_at: data.user.created_at,
         };
       }

@@ -73,7 +73,7 @@ export const AuthPageContainer: React.FC<AuthPageContainerProps> = ({
 }) => {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirectTarget = searchParams.get("redirect") || "/dashboard";
+  const redirectTarget = searchParams.get("redirect") || "/";
   const [mode, setMode] = useState<"login" | "register">(initialMode);
   const [activeSlide, setActiveSlide] = useState(0);
 

@@ -1,13 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
-import { ADMIN_EMAIL } from "@/services/authService";
+import { ADMIN_EMAIL, ADMIN_NAME, ADMIN_PHONE } from "@/services/authService";
 import { getBaseUrl } from "@/lib/utils/url";
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const baseUrl = getBaseUrl(request);
   const code = searchParams.get("code");
-  const redirectTarget = searchParams.get("redirect") || searchParams.get("next") || "/dashboard";
+  // Default redirect destination is the production homepage as specified
+  const redirectTarget = searchParams.get("redirect") || searchParams.get("next") || "/";
 
   if (code) {
     try {
@@ -15,32 +16,79 @@ export async function GET(request: NextRequest) {
       if (supabase) {
         const { error, data } = await supabase.auth.exchangeCodeForSession(code);
         if (!error && data?.user?.email) {
-          const userEmail = data.user.email.toLowerCase();
+          const user = data.user;
+          const userEmail = user.email!.toLowerCase();
           const isUserAdmin = userEmail === ADMIN_EMAIL.toLowerCase();
 
-          // Upsert Google user profile in Supabase PostgreSQL
+          // Extract Google metadata
+          const fullName =
+            user.user_metadata?.full_name ||
+            user.user_metadata?.name ||
+            (isUserAdmin ? ADMIN_NAME : userEmail.split("@")[0]);
+
+          const avatarUrl =
+            user.user_metadata?.avatar_url ||
+            user.user_metadata?.picture ||
+            "";
+
+          let isNewUser = false;
+
+          // Check if user profile already exists in PostgreSQL profiles table
           try {
-            await supabase.from("profiles").upsert({
-              id: data.user.id,
-              full_name: data.user.user_metadata?.full_name || data.user.user_metadata?.name || "Explorer",
-              dob: data.user.user_metadata?.dob || "1998-05-14",
-              phone_number: data.user.user_metadata?.phone_number || null,
-              role: isUserAdmin ? "admin" : "visitor",
-              updated_at: new Date().toISOString(),
-            });
+            const { data: existingProfile } = await supabase
+              .from("profiles")
+              .select("id, full_name, avatar_url, role")
+              .eq("id", user.id)
+              .maybeSingle();
+
+            if (!existingProfile) {
+              isNewUser = true;
+              // Register new profile
+              await supabase.from("profiles").insert({
+                id: user.id,
+                full_name: fullName,
+                avatar_url: avatarUrl,
+                role: isUserAdmin ? "admin" : "visitor",
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString(),
+              });
+            } else {
+              // Existing profile: update login timestamp and sync avatar if available
+              const updatePayload: Record<string, any> = {
+                updated_at: new Date().toISOString(),
+              };
+              if (avatarUrl && !existingProfile.avatar_url) {
+                updatePayload.avatar_url = avatarUrl;
+              }
+              if (isUserAdmin && existingProfile.role !== "admin") {
+                updatePayload.role = "admin";
+              }
+
+              await supabase
+                .from("profiles")
+                .update(updatePayload)
+                .eq("id", user.id);
+            }
           } catch (profileErr) {
-            console.warn("Could not upsert OAuth profile:", profileErr);
+            console.warn("OAuth profile registration/update warning:", profileErr);
           }
 
-          const response = NextResponse.redirect(new URL(redirectTarget, baseUrl));
+          // Build final production redirect URL
+          const finalUrl = new URL(redirectTarget, baseUrl);
+          finalUrl.searchParams.set("auth_success", isNewUser ? "google_register" : "google_login");
+          if (fullName) {
+            finalUrl.searchParams.set("user_name", encodeURIComponent(fullName));
+          }
 
-          // Set secure session cookie
+          const response = NextResponse.redirect(finalUrl);
+
+          // Set secure session cookie (HTTP-only)
           response.cookies.set("hg_user_email", userEmail, {
             path: "/",
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
             sameSite: "lax",
-            maxAge: 60 * 60 * 24 * 7,
+            maxAge: 60 * 60 * 24 * 7, // 7 days
           });
 
           return response;
@@ -51,7 +99,7 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  // Fallback to login with error parameter
+  // Fallback to login page with error indicator if code exchange could not be completed
   return NextResponse.redirect(
     new URL(`/login?error=oauth_failed&redirect=${encodeURIComponent(redirectTarget)}`, baseUrl)
   );
