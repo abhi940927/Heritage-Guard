@@ -31,6 +31,7 @@ export interface RazorpayOrderResponse {
   currency: string;
   receipt?: string;
   status: string;
+  keyId?: string;
   isSimulated?: boolean;
 }
 
@@ -77,6 +78,7 @@ export async function createRazorpayOrderDirect(
       currency: data.currency,
       receipt: data.receipt,
       status: data.status,
+      keyId: keyId,
     };
   } catch (error: any) {
     console.error("Razorpay API connection warning:", error?.message || error);

@@ -55,17 +55,12 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    const keyId =
-      process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID ||
-      process.env.RAZORPAY_KEY_ID ||
-      "";
-
     return NextResponse.json({
       success: true,
       orderId: order.id,
       amount: order.amount,
       currency: order.currency,
-      keyId,
+      keyId: order.keyId || process.env.RAZORPAY_KEY_ID || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "",
       receipt: order.receipt,
       isSimulated: order.isSimulated,
     });
